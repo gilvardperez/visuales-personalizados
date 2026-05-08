@@ -19,6 +19,8 @@ export interface ThemeTokens {
 }
 
 let gradientCounter = 0;
+// Relación simple para convertir viewport en padding visualmente estable entre 16 y 24px.
+const ADAPTIVE_PADDING_DIVISOR = 12;
 
 interface HeaderElements {
     title?: HTMLDivElement;
@@ -154,7 +156,7 @@ export function applyCardContainer(
     card.style.setProperty("--kpi-highlight", settings.highlightColor || theme.accent);
     card.style.setProperty("--kpi-radius", `${clamp(settings.cornerRadius, 0, 32)}px`);
 
-    const adaptivePadding = clamp(Math.round(Math.min(viewport.width, viewport.height) / 12), 16, 24);
+    const adaptivePadding = clamp(Math.round(Math.min(viewport.width, viewport.height) / ADAPTIVE_PADDING_DIVISOR), 16, 24);
     card.style.padding = `${adaptivePadding}px`;
 
     if (settings.cardStyle === "flat") {
@@ -172,7 +174,17 @@ export function applyCardContainer(
     return card;
 }
 
-export function clearAndCreateCard(container: HTMLElement, variantClass: string, settings: VisualSettings): HTMLDivElement {
+export function clearAndCreateCard(container: HTMLElement, variantClass: string, settings?: VisualSettings): HTMLDivElement {
+    if (!settings) {
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+        const card = document.createElement("div");
+        card.className = `kpi-card kpi-${variantClass}`;
+        container.appendChild(card);
+        return card;
+    }
+
     const viewport = getViewport(container);
     const theme = resolveTheme(settings, viewport);
     return applyCardContainer(container, settings, theme, variantClass);
@@ -289,7 +301,7 @@ export function buildValue(
     value.style.fontSize = `${responsiveFont(settings.valueFontSize, viewport, 18, 86)}px`;
     value.style.color = theme?.textPrimary || settings.valueColor;
     value.style.letterSpacing = "-0.02em";
-    value.style.fontWeight = "780";
+    value.style.fontWeight = "800";
     applyAnimation(value, "value", settings);
     return value;
 }
@@ -475,10 +487,6 @@ export function formatValue(value: number, settings: VisualSettings): string {
     return `${formatted}${suffix}`;
 }
 
-export function formatNumber(value: number, settings: VisualSettings): string {
-    return formatValue(value, settings);
-}
-
 export function renderLastValueLabel(
     svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
     x: number,
@@ -495,7 +503,12 @@ export function renderLastValueLabel(
         .attr("fill", color)
         .text(text);
 
-    const bbox = (textNode.node() as SVGTextElement).getBBox();
+    const textNodeElement = textNode.node();
+    if (!textNodeElement) {
+        return;
+    }
+
+    const bbox = textNodeElement.getBBox();
 
     labelGroup.insert("rect", "text")
         .attr("x", bbox.x - 4)

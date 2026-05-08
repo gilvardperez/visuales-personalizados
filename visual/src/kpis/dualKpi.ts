@@ -48,7 +48,7 @@ export function renderDualKpi(container: HTMLElement, data: KpiRenderData, setti
 
     renderDeltaBadge(primary, data.deltaRaw, settings, theme, data.deltaText);
 
-    const trendDelta = computeDeltaFromSeries(data.trendPoints) / 100;
+    const trendDelta = computeDeltaFromSeries(data.trendPoints);
     renderDeltaBadge(secondary, trendDelta, settings, theme, `${trendDelta >= 0 ? "+" : ""}${(trendDelta * 100).toFixed(settings.decimalPlaces)}%`);
 
     dual.appendChild(primary);
@@ -68,5 +68,5 @@ function computeDeltaFromSeries(points: KpiRenderData["trendPoints"]): number {
         return 0;
     }
 
-    return ((last - previous) / previous) * 100;
+    return (last - previous) / previous;
 }

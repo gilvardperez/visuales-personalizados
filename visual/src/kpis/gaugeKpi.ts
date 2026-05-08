@@ -39,7 +39,7 @@ export function renderGaugeKpi(container: HTMLElement, data: KpiRenderData, sett
     const g = svg.append("g").attr("transform", `translate(${radius}, ${radius})`);
 
     const min = settings.gaugeMinValue;
-    const max = settings.gaugeMaxValue <= min ? min + 1 : settings.gaugeMaxValue;
+    const max = settings.gaugeMaxValue <= min ? 100 : settings.gaugeMaxValue;
     const value = clamp(data.progressRatio !== undefined ? data.progressRatio * 100 : data.value, min, max);
     const red = clamp(settings.gaugeRedThreshold, min, max);
     const yellow = clamp(settings.gaugeYellowThreshold, red, max);

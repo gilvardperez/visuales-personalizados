@@ -30,9 +30,10 @@ export function renderHeatStripKpi(container: HTMLElement, data: KpiRenderData, 
     card.appendChild(host);
 
     const max = d3.max(data.trendPoints, (d) => d.y) ?? 1;
+    const minColor = theme.mode === "dark" ? "#1E293B" : "#DBEAFE";
     const scale = d3.scaleLinear<string>()
         .domain([0, max])
-        .range(["#DBEAFE", theme.accent]);
+        .range([minColor, theme.accent]);
 
     data.trendPoints.slice(0, 12).forEach((point) => {
         const cell = document.createElement("div");
