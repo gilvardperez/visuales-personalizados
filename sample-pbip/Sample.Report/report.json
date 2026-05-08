@@ -1,0 +1,43 @@
+{
+  "version": "1.0",
+  "themeCollection": {
+    "baseTheme": "CY24SU04"
+  },
+  "publicCustomVisuals": [
+    "kpiDesignStudioA1B2C3D4078D079CCA2F48A9BDA3A24708D4D33E"
+  ],
+  "sections": [
+    {
+      "displayName": "KPI Samples",
+      "name": "ReportSection",
+      "width": 1280,
+      "height": 720,
+      "visualContainers": [
+        {
+          "x": 40,
+          "y": 80,
+          "z": 0,
+          "width": 360,
+          "height": 220,
+          "config": "{\"name\":\"defaultKpi\",\"singleVisual\":{\"visualType\":\"kpiDesignStudioA1B2C3D4078D079CCA2F48A9BDA3A24708D4D33E\",\"projections\":{\"value\":[{\"queryRef\":\"Sales.Total Actual\"}],\"comparison\":[{\"queryRef\":\"Sales.Total Previous\"}]},\"objects\":{\"kpiStyle\":[{\"properties\":{\"kpiVariant\":{\"expr\":{\"Literal\":{\"Value\":\"'default'\"}}}}}]}}}"
+        },
+        {
+          "x": 440,
+          "y": 80,
+          "z": 1,
+          "width": 360,
+          "height": 220,
+          "config": "{\"name\":\"progressKpi\",\"singleVisual\":{\"visualType\":\"kpiDesignStudioA1B2C3D4078D079CCA2F48A9BDA3A24708D4D33E\",\"projections\":{\"value\":[{\"queryRef\":\"Sales.Total Actual\"}],\"comparison\":[{\"queryRef\":\"Sales.Total Target\"}]},\"objects\":{\"kpiStyle\":[{\"properties\":{\"kpiVariant\":{\"expr\":{\"Literal\":{\"Value\":\"'progress'\"}}}}}]}}}"
+        },
+        {
+          "x": 840,
+          "y": 80,
+          "z": 2,
+          "width": 360,
+          "height": 220,
+          "config": "{\"name\":\"microchartKpi\",\"singleVisual\":{\"visualType\":\"kpiDesignStudioA1B2C3D4078D079CCA2F48A9BDA3A24708D4D33E\",\"projections\":{\"value\":[{\"queryRef\":\"Sales.Total Actual\"}],\"comparison\":[{\"queryRef\":\"Sales.Total Previous\"}],\"trend\":[{\"queryRef\":\"Sales.Date\"}],\"trendValues\":[{\"queryRef\":\"Sales.Actual\"}]},\"objects\":{\"kpiStyle\":[{\"properties\":{\"kpiVariant\":{\"expr\":{\"Literal\":{\"Value\":\"'microchart'\"}}}}}]}}}"
+        }
+      ]
+    }
+  ]
+}
