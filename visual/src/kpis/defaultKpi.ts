@@ -11,5 +11,5 @@ export function renderDefaultKpi(container: HTMLElement, data: KpiRenderData, se
     const viewport = getViewport(container);
     const theme = resolveTheme(settings, viewport);
     const card = applyCardContainer(container, settings, theme, "default");
-    appendTopSection(card, data, settings, viewport, false, theme);
+    appendTopSection(card, data, settings, viewport, theme);
 }

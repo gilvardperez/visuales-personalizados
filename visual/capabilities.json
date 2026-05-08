@@ -35,22 +35,13 @@
           "type": {
             "enumeration": [
               { "value": "default" },
-              { "value": "progress" },
-              { "value": "microchart" },
               { "value": "area" },
               { "value": "bars" },
-              { "value": "barsLine" },
+              { "value": "progress" },
               { "value": "bullet" },
               { "value": "donut" },
-              { "value": "lollipop" },
-              { "value": "dual" },
-              { "value": "callout" },
-              { "value": "stackedCompare" },
               { "value": "gauge" },
-              { "value": "waterfall" },
-              { "value": "heatStrip" },
-              { "value": "comparison" },
-              { "value": "radial" }
+              { "value": "comparison" }
             ]
           }
         },
@@ -116,13 +107,6 @@
           }
         },
         "deltaShowArrow": { "displayName": "Show arrow", "type": { "bool": true } }
-      }
-    },
-    "animation": {
-      "displayName": "Animation",
-      "properties": {
-        "enableAnimation": { "displayName": "Enable animation", "type": { "bool": true } },
-        "animationDuration": { "displayName": "Animation duration (ms)", "type": { "numeric": true } }
       }
     },
     "colors": {
@@ -197,7 +181,9 @@
         "showTitle": { "displayName": "Show title", "type": { "bool": true } },
         "titleText": { "displayName": "Title text", "type": { "text": true } },
         "titleFontSize": { "displayName": "Title font size", "type": { "numeric": true } },
-        "deltaSuffix": { "displayName": "Delta suffix", "type": { "text": true } }
+        "deltaSuffix": { "displayName": "Delta suffix", "type": { "text": true } },
+        "comparisonSuffix": { "displayName": "Comparison suffix", "type": { "text": true } },
+        "showComparisonValue": { "displayName": "Show comparison value", "type": { "bool": true } }
       }
     },
     "bulletDonut": {

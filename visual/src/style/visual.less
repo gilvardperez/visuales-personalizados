@@ -10,13 +10,11 @@
     --kpi-highlight: #2563eb;
     --kpi-radius: 12px;
     --kpi-accent-left: var(--kpi-accent);
-    --kpi-anim-duration: 250ms;
 
     font-family: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
     height: 100%;
     width: 100%;
     box-sizing: border-box;
@@ -40,15 +38,14 @@
 .kpi-label,
 .kpi-value,
 .kpi-delta,
+.kpi-subtitle,
 .kpi-month-label,
 .kpi-progress-text,
-.kpi-dual-label,
-.kpi-dual-value,
 .kpi-no-data,
-.kpi-donut-value {
+.kpi-donut-value,
+.kpi-donut-caption {
     margin: 0;
     padding: 0;
-    letter-spacing: normal;
 }
 
 .kpi-title,
@@ -59,18 +56,39 @@
     letter-spacing: 0.08em;
 }
 
+.kpi-title {
+    margin-bottom: 2px;
+}
+
+.kpi-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
 .kpi-value {
     font-weight: 800;
     line-height: 1.05;
     color: var(--kpi-text);
     word-break: break-word;
     letter-spacing: -0.02em;
+    margin-bottom: 2px;
+}
+
+.kpi-subtitle {
+    font-size: 12px;
+    color: var(--kpi-text-secondary);
+    line-height: 1.2;
+    margin-bottom: 12px;
 }
 
 .kpi-delta {
     font-size: 12px;
     font-weight: 700;
     color: var(--kpi-positive);
+    white-space: nowrap;
 }
 
 .kpi-delta-badge {
@@ -85,19 +103,17 @@
     border-radius: 999px;
 }
 
-.kpi-value-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 8px;
-}
-
-.kpi-value-row-compact {
-    gap: 4px;
-}
-
 .kpi-chart-host {
-    margin-top: auto;
+    margin-top: 0;
+    flex: 1;
+    min-height: 40px;
+    width: 100%;
+}
+
+.kpi-chart-host svg {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .kpi-month-label {
@@ -106,17 +122,19 @@
     font-weight: 600;
 }
 
-.kpi-last-value text {
+.kpi-last-value text,
+.kpi-last-bar-label {
     font-size: 10px;
     font-weight: 700;
 }
 
 .kpi-progress-track {
     width: 100%;
-    height: 10px;
+    height: 14px;
     background: var(--kpi-border);
     border-radius: 999px;
     overflow: hidden;
+    margin-top: 0;
 }
 
 .kpi-progress-fill {
@@ -128,42 +146,23 @@
     font-size: 12px;
     color: var(--kpi-text-secondary);
     font-weight: 600;
-}
-
-.kpi-bullet {
-    position: relative;
-    display: flex;
-    width: 100%;
-    height: 18px;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid var(--kpi-border);
-}
-
-.kpi-bullet-band {
-    height: 100%;
-}
-
-.kpi-bullet-actual {
-    position: absolute;
-    left: 0;
-    top: 4px;
-    height: 10px;
-    border-radius: 4px;
-}
-
-.kpi-bullet-target {
-    position: absolute;
-    top: 0;
-    width: 2px;
-    height: 100%;
-    transform: translateX(-1px);
+    text-align: right;
+    margin-top: 6px;
 }
 
 .kpi-donut-host {
-    margin-top: auto;
+    margin-top: 0;
+    flex: 1;
     display: flex;
     justify-content: center;
+    align-items: center;
+    min-height: 72px;
+}
+
+.kpi-donut-host svg {
+    width: 100%;
+    height: 100%;
+    max-width: 180px;
 }
 
 .kpi-donut-value {
@@ -172,66 +171,22 @@
     font-weight: 800;
 }
 
-.kpi-dual-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: auto;
-}
-
-.kpi-dual-item {
-    border: 1px solid var(--kpi-border);
-    border-radius: 8px;
-    padding: 10px;
-}
-
-.kpi-dual-label {
-    font-size: 11px;
-    color: var(--kpi-text-secondary);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-.kpi-dual-value {
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1.1;
-}
-
-.kpi-no-data {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--kpi-text-secondary);
-    font-family: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+.kpi-donut-caption {
+    fill: var(--kpi-text-secondary);
+    font-size: 10px;
     font-weight: 600;
-}
-
-.kpi-heat-strip {
-    margin-top: auto;
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 4px;
-}
-
-.kpi-heat-cell {
-    height: 18px;
-    border-radius: 4px;
-    border: 1px solid var(--kpi-border);
 }
 
 .kpi-comparison-chart {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    margin-top: auto;
 }
 
 .kpi-comparison-row {
     display: grid;
-    grid-template-columns: 52px 1fr auto;
+    grid-template-columns: 46px 1fr auto;
     align-items: center;
     gap: 8px;
     font-size: 11px;
@@ -240,7 +195,7 @@
 
 .kpi-comparison-row > div {
     width: 100%;
-    height: 12px;
+    height: 14px;
     border-radius: 999px;
     background: var(--kpi-border);
     overflow: hidden;
@@ -256,68 +211,19 @@
     color: var(--kpi-text);
 }
 
-.kpi-fade-in {
-    opacity: 0;
-    animation: kpi-fade var(--kpi-anim-duration) ease-out forwards;
+.kpi-comparison-diff {
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 700;
 }
 
-.kpi-slide-up {
-    transform: translateY(6px);
-    animation: kpi-slide-up var(--kpi-anim-duration) ease-out forwards;
-}
-
-.kpi-line-draw {
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    animation: kpi-line-draw var(--kpi-anim-duration) ease-out forwards;
-}
-
-.kpi-bar-grow {
-    transform-origin: bottom;
-    animation: kpi-bar-grow var(--kpi-anim-duration) ease-out forwards;
-}
-
-.kpi-arc-grow {
-    transform-origin: center;
-    animation: kpi-arc-grow var(--kpi-anim-duration) ease-out forwards;
-}
-
-@keyframes kpi-fade {
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes kpi-slide-up {
-    to {
-        transform: translateY(0);
-    }
-}
-
-@keyframes kpi-line-draw {
-    to {
-        stroke-dashoffset: 0;
-    }
-}
-
-@keyframes kpi-bar-grow {
-    from {
-        transform: scaleY(0);
-    }
-
-    to {
-        transform: scaleY(1);
-    }
-}
-
-@keyframes kpi-arc-grow {
-    from {
-        opacity: 0;
-        transform: rotate(-90deg);
-    }
-
-    to {
-        opacity: 1;
-        transform: rotate(0deg);
-    }
+.kpi-no-data {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--kpi-text-secondary);
+    font-family: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-weight: 600;
 }
