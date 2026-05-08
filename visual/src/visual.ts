@@ -14,22 +14,13 @@ import DataViewValueColumn = powerbi.DataViewValueColumn;
 import { getVisualSettings, VisualFormattingSettingsModel } from "./settings";
 import { KpiRenderData, TrendPoint } from "./kpis/types";
 import { renderDefaultKpi } from "./kpis/defaultKpi";
-import { renderProgressKpi } from "./kpis/progressKpi";
-import { renderMicrochartKpi } from "./kpis/microchartKpi";
 import { renderAreaKpi } from "./kpis/areaKpi";
 import { renderBarsKpi } from "./kpis/barsKpi";
-import { renderBarsLineKpi } from "./kpis/barsLineKpi";
+import { renderProgressKpi } from "./kpis/progressKpi";
 import { renderBulletKpi } from "./kpis/bulletKpi";
 import { renderDonutKpi } from "./kpis/donutKpi";
-import { renderLollipopKpi } from "./kpis/lollipopKpi";
-import { renderDualKpi } from "./kpis/dualKpi";
-import { renderCalloutKpi } from "./kpis/calloutKpi";
-import { renderStackedCompareKpi } from "./kpis/stackedCompareKpi";
 import { renderGaugeKpi } from "./kpis/gaugeKpi";
-import { renderWaterfallKpi } from "./kpis/waterfallKpi";
-import { renderHeatStripKpi } from "./kpis/heatStripKpi";
 import { renderComparisonKpi } from "./kpis/comparisonKpi";
-import { renderRadialKpi } from "./kpis/radialKpi";
 
 export class Visual implements IVisual {
     private hostElement: HTMLElement;
@@ -66,20 +57,14 @@ export class Visual implements IVisual {
         }
 
         switch (settings.kpiVariant) {
-            case "progress":
-                renderProgressKpi(this.hostElement, renderData, settings);
-                break;
-            case "microchart":
-                renderMicrochartKpi(this.hostElement, renderData, settings);
-                break;
             case "area":
                 renderAreaKpi(this.hostElement, renderData, settings);
                 break;
             case "bars":
                 renderBarsKpi(this.hostElement, renderData, settings);
                 break;
-            case "barsLine":
-                renderBarsLineKpi(this.hostElement, renderData, settings);
+            case "progress":
+                renderProgressKpi(this.hostElement, renderData, settings);
                 break;
             case "bullet":
                 renderBulletKpi(this.hostElement, renderData, settings);
@@ -87,32 +72,11 @@ export class Visual implements IVisual {
             case "donut":
                 renderDonutKpi(this.hostElement, renderData, settings);
                 break;
-            case "lollipop":
-                renderLollipopKpi(this.hostElement, renderData, settings);
-                break;
-            case "dual":
-                renderDualKpi(this.hostElement, renderData, settings);
-                break;
-            case "callout":
-                renderCalloutKpi(this.hostElement, renderData, settings);
-                break;
-            case "stackedCompare":
-                renderStackedCompareKpi(this.hostElement, renderData, settings);
-                break;
             case "gauge":
                 renderGaugeKpi(this.hostElement, renderData, settings);
                 break;
-            case "waterfall":
-                renderWaterfallKpi(this.hostElement, renderData, settings);
-                break;
-            case "heatStrip":
-                renderHeatStripKpi(this.hostElement, renderData, settings);
-                break;
             case "comparison":
                 renderComparisonKpi(this.hostElement, renderData, settings);
-                break;
-            case "radial":
-                renderRadialKpi(this.hostElement, renderData, settings);
                 break;
             default:
                 renderDefaultKpi(this.hostElement, renderData, settings);

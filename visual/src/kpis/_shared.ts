@@ -19,13 +19,6 @@ export interface ThemeTokens {
 }
 
 let gradientCounter = 0;
-// Relación simple para convertir viewport en padding visualmente estable entre 16 y 24px.
-const ADAPTIVE_PADDING_DIVISOR = 12;
-
-interface HeaderElements {
-    title?: HTMLDivElement;
-    label: HTMLDivElement;
-}
 
 function toHexUpper(value: string): string {
     return (value || "").trim().toUpperCase();
@@ -42,7 +35,16 @@ function resolveThemeMode(settings: VisualSettings): ThemeModeResolved {
     return settings.theme;
 }
 
-function colorWithAlpha(color: string, alpha: number): string {
+function resolveColorOverride(value: string, lightDefault: string, darkDefault: string, fallback: string): string {
+    const current = toHexUpper(value);
+    if (!current || current === toHexUpper(lightDefault) || current === toHexUpper(darkDefault)) {
+        return fallback;
+    }
+
+    return value;
+}
+
+export function colorWithAlpha(color: string, alpha: number): string {
     const safeAlpha = clamp(alpha, 0, 1);
     const hex = (color || "").trim().replace("#", "");
     if (/^[0-9a-fA-F]{6}$/.test(hex)) {
@@ -53,15 +55,6 @@ function colorWithAlpha(color: string, alpha: number): string {
     }
 
     return color;
-}
-
-function resolveColorOverride(value: string, lightDefault: string, darkDefault: string, fallback: string): string {
-    const current = toHexUpper(value);
-    if (!current || current === toHexUpper(lightDefault) || current === toHexUpper(darkDefault)) {
-        return fallback;
-    }
-
-    return value;
 }
 
 export function resolveTheme(settings: VisualSettings, _viewport: { width: number; height: number }): ThemeTokens {
@@ -120,14 +113,14 @@ export function responsiveFont(baseSize: number, viewport: { width: number; heig
 }
 
 export function isCompactViewport(viewport: { width: number; height: number }): boolean {
-    return viewport.width < 200;
+    return viewport.width < 220;
 }
 
 export function shouldHideMiniChart(viewport: { width: number; height: number }): boolean {
-    return viewport.height < 100;
+    return viewport.height < 110;
 }
 
-export function getChartHeight(settings: VisualSettings, viewport: { width: number; height: number }, ratio: number = 0.55, minHeight: number = 52): number {
+export function getChartHeight(settings: VisualSettings, viewport: { width: number; height: number }, ratio: number = 0.42, minHeight: number = 48): number {
     const chartHeight = clamp(settings.chartHeight, 20, 200);
     return Math.min(chartHeight, Math.max(minHeight, Math.floor(viewport.height * ratio)));
 }
@@ -142,7 +135,6 @@ export function applyCardContainer(
         container.removeChild(container.firstChild);
     }
 
-    const viewport = getViewport(container);
     const card = document.createElement("div");
     card.className = `kpi-card kpi-${variantClass}`;
     card.style.setProperty("--kpi-bg", theme.background);
@@ -155,9 +147,6 @@ export function applyCardContainer(
     card.style.setProperty("--kpi-neutral", theme.neutral);
     card.style.setProperty("--kpi-highlight", settings.highlightColor || theme.accent);
     card.style.setProperty("--kpi-radius", `${clamp(settings.cornerRadius, 0, 32)}px`);
-
-    const adaptivePadding = clamp(Math.round(Math.min(viewport.width, viewport.height) / ADAPTIVE_PADDING_DIVISOR), 16, 24);
-    card.style.padding = `${adaptivePadding}px`;
 
     if (settings.cardStyle === "flat") {
         card.classList.add("kpi-card-flat");
@@ -174,22 +163,6 @@ export function applyCardContainer(
     return card;
 }
 
-export function clearAndCreateCard(container: HTMLElement, variantClass: string, settings?: VisualSettings): HTMLDivElement {
-    if (!settings) {
-        while (container.firstChild) {
-            container.removeChild(container.firstChild);
-        }
-        const card = document.createElement("div");
-        card.className = `kpi-card kpi-${variantClass}`;
-        container.appendChild(card);
-        return card;
-    }
-
-    const viewport = getViewport(container);
-    const theme = resolveTheme(settings, viewport);
-    return applyCardContainer(container, settings, theme, variantClass);
-}
-
 export function renderNoData(container: HTMLElement): void {
     while (container.firstChild) {
         container.removeChild(container.firstChild);
@@ -200,45 +173,6 @@ export function renderNoData(container: HTMLElement): void {
     container.appendChild(noData);
 }
 
-export function applyAnimation(element: Element, type: "value" | "line" | "bar" | "arc", settings: VisualSettings): void {
-    if (!settings.enableAnimation || !(element instanceof HTMLElement || element instanceof SVGElement)) {
-        return;
-    }
-
-    const duration = `${clamp(settings.animationDuration, 0, 1000)}ms`;
-    if (element instanceof HTMLElement) {
-        element.style.setProperty("--kpi-anim-duration", duration);
-    }
-    if (element instanceof SVGElement) {
-        element.style.setProperty("--kpi-anim-duration", duration);
-    }
-
-    if (type === "value") {
-        element.classList.add("kpi-fade-in", "kpi-slide-up");
-    } else if (type === "line") {
-        element.classList.add("kpi-line-draw");
-    } else if (type === "bar") {
-        element.classList.add("kpi-bar-grow");
-    } else {
-        element.classList.add("kpi-arc-grow");
-    }
-}
-
-export function buildTitle(settings: VisualSettings, viewport: { width: number; height: number }, theme?: ThemeTokens): HTMLDivElement | null {
-    if (!settings.showTitle || !settings.titleText.trim()) {
-        return null;
-    }
-
-    const title = document.createElement("div");
-    title.className = "kpi-title";
-    title.textContent = settings.titleText;
-    title.style.fontSize = `${responsiveFont(settings.titleFontSize, viewport, 11, 28)}px`;
-    if (theme) {
-        title.style.color = theme.textSecondary;
-    }
-    return title;
-}
-
 export function renderHeader(
     parent: HTMLElement,
     label: string,
@@ -246,8 +180,8 @@ export function renderHeader(
     settings: VisualSettings,
     theme: ThemeTokens,
     viewport: { width: number; height: number } = getViewport(parent)
-): HeaderElements {
-    const header: HeaderElements = {
+): { title?: HTMLDivElement; label: HTMLDivElement } {
+    const header: { title?: HTMLDivElement; label: HTMLDivElement } = {
         label: document.createElement("div")
     };
 
@@ -264,29 +198,9 @@ export function renderHeader(
     header.label.textContent = label;
     header.label.style.fontSize = `${responsiveFont(settings.labelFontSize, viewport, 11, 20)}px`;
     header.label.style.color = theme.textSecondary;
-    header.label.style.textTransform = "uppercase";
-    header.label.style.letterSpacing = "0.08em";
     parent.appendChild(header.label);
 
     return header;
-}
-
-export function buildLabel(
-    text: string,
-    settings: VisualSettings,
-    viewport: { width: number; height: number },
-    theme?: ThemeTokens
-): HTMLDivElement {
-    const label = document.createElement("div");
-    label.className = "kpi-label";
-    label.textContent = text;
-    label.style.fontSize = `${responsiveFont(settings.labelFontSize, viewport, 11, 20)}px`;
-    label.style.textTransform = "uppercase";
-    label.style.letterSpacing = "0.08em";
-    if (theme) {
-        label.style.color = theme.textSecondary;
-    }
-    return label;
 }
 
 export function buildValue(
@@ -300,9 +214,6 @@ export function buildValue(
     value.textContent = text;
     value.style.fontSize = `${responsiveFont(settings.valueFontSize, viewport, 18, 86)}px`;
     value.style.color = theme?.textPrimary || settings.valueColor;
-    value.style.letterSpacing = "-0.02em";
-    value.style.fontWeight = "800";
-    applyAnimation(value, "value", settings);
     return value;
 }
 
@@ -342,21 +253,31 @@ export function renderDeltaBadge(
     return delta;
 }
 
-export function buildDelta(
+function buildSubtitle(
     data: KpiRenderData,
     settings: VisualSettings,
-    viewport: { width: number; height: number },
-    theme: ThemeTokens
-): HTMLDivElement {
-    const wrapper = document.createElement("div");
-    wrapper.className = "kpi-delta-wrap";
-    wrapper.style.fontSize = `${responsiveFont(settings.labelFontSize, viewport, 11, 18)}px`;
-
-    if (isCompactViewport(viewport)) {
-        wrapper.classList.add("kpi-delta-compact");
+    theme: ThemeTokens,
+    subtitleOverride?: string,
+    suppressComparisonSubtitle?: boolean
+): HTMLDivElement | null {
+    if (subtitleOverride !== undefined) {
+        const subtitle = document.createElement("div");
+        subtitle.className = "kpi-subtitle";
+        subtitle.textContent = subtitleOverride;
+        subtitle.style.color = theme.textSecondary;
+        return subtitle;
     }
 
-    return renderDeltaBadge(wrapper, data.deltaRaw, settings, theme, data.deltaText);
+    if (suppressComparisonSubtitle || !settings.showComparisonValue || data.comparison === null || data.comparisonText === undefined) {
+        return null;
+    }
+
+    const subtitle = document.createElement("div");
+    subtitle.className = "kpi-subtitle";
+    const suffix = settings.comparisonSuffix.trim();
+    subtitle.textContent = `vs ${data.comparisonText}${suffix ? ` ${suffix}` : ""}`;
+    subtitle.style.color = theme.textSecondary;
+    return subtitle;
 }
 
 export function appendTopSection(
@@ -364,41 +285,30 @@ export function appendTopSection(
     data: KpiRenderData,
     settings: VisualSettings,
     viewport: { width: number; height: number },
-    valueFirst: boolean = false,
-    theme?: ThemeTokens
-): { value: HTMLDivElement; label: HTMLDivElement; delta: HTMLDivElement } {
-    const resolvedTheme = theme ?? resolveTheme(settings, viewport);
-    const header = renderHeader(card, data.label, settings.titleText, settings, resolvedTheme, viewport);
-    const value = buildValue(data.valueText, settings, viewport, resolvedTheme);
-    const delta = renderDeltaBadge(document.createElement("div"), data.deltaRaw, settings, resolvedTheme, data.deltaText);
+    theme: ThemeTokens,
+    options?: { subtitleOverride?: string; suppressComparisonSubtitle?: boolean }
+): { value: HTMLDivElement; label: HTMLDivElement; delta: HTMLDivElement; subtitle: HTMLDivElement | null } {
+    const { label } = renderHeader(card, data.label, settings.titleText, settings, theme, viewport);
 
-    const valueRow = document.createElement("div");
-    valueRow.className = "kpi-value-row";
+    const topRow = document.createElement("div");
+    topRow.className = "kpi-top-row";
+    topRow.appendChild(label);
+    const delta = renderDeltaBadge(topRow, data.deltaRaw, settings, theme, data.deltaText);
+    card.appendChild(topRow);
 
-    if (isCompactViewport(viewport)) {
-        valueRow.classList.add("kpi-value-row-compact");
-    }
+    const value = buildValue(data.valueText, settings, viewport, theme);
+    card.appendChild(value);
 
-    valueRow.appendChild(value);
-    if (!isCompactViewport(viewport)) {
-        valueRow.appendChild(delta);
-    }
-
-    if (valueFirst || settings.labelPosition === "bottom") {
-        card.appendChild(valueRow);
-        if (settings.labelPosition === "bottom") {
-            card.appendChild(header.label);
-        }
-    } else {
-        card.appendChild(header.label);
-        card.appendChild(valueRow);
+    const subtitle = buildSubtitle(data, settings, theme, options?.subtitleOverride, options?.suppressComparisonSubtitle);
+    if (subtitle) {
+        card.appendChild(subtitle);
     }
 
     if (isCompactViewport(viewport)) {
-        card.appendChild(delta);
+        delta.classList.add("kpi-delta-compact");
     }
 
-    return { value, label: header.label, delta };
+    return { value, label, delta, subtitle };
 }
 
 export function monthLabels(points: TrendPoint[]): string[] {
@@ -492,13 +402,14 @@ export function renderLastValueLabel(
     x: number,
     y: number,
     text: string,
-    color: string
+    color: string,
+    bounds: { width: number; top: number }
 ): void {
     const labelGroup = svg.append("g").attr("class", "kpi-last-value");
 
     const textNode = labelGroup.append("text")
         .attr("x", x)
-        .attr("y", y - 8)
+        .attr("y", y)
         .attr("text-anchor", "middle")
         .attr("fill", color)
         .text(text);
@@ -509,10 +420,17 @@ export function renderLastValueLabel(
     }
 
     const bbox = textNodeElement.getBBox();
+    const halfWidth = (bbox.width + 8) / 2;
+    const safeX = clamp(x, halfWidth + 2, bounds.width - halfWidth - 2);
+    const safeY = Math.max(bounds.top + bbox.height + 8, y);
+
+    textNode
+        .attr("x", safeX)
+        .attr("y", safeY - 6);
 
     labelGroup.insert("rect", "text")
-        .attr("x", bbox.x - 4)
-        .attr("y", bbox.y - 2)
+        .attr("x", safeX - halfWidth)
+        .attr("y", safeY - bbox.height - 8)
         .attr("width", bbox.width + 8)
         .attr("height", bbox.height + 4)
         .attr("rx", 4)
@@ -520,7 +438,6 @@ export function renderLastValueLabel(
         .attr("fill", colorWithAlpha(color, 0.12))
         .attr("stroke", colorWithAlpha(color, 0.25));
 }
-
 
 export function createUniqueId(prefix: string): string {
     gradientCounter += 1;

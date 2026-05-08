@@ -9,22 +9,13 @@ import FormattingSettingsModel = formattingSettings.Model;
 
 export type KpiVariant =
     | "default"
-    | "progress"
-    | "microchart"
     | "area"
     | "bars"
-    | "barsLine"
+    | "progress"
     | "bullet"
     | "donut"
-    | "lollipop"
-    | "dual"
-    | "callout"
-    | "stackedCompare"
     | "gauge"
-    | "waterfall"
-    | "heatStrip"
-    | "comparison"
-    | "radial";
+    | "comparison";
 
 export type LabelPosition = "top" | "bottom";
 export type DisplayUnits = "auto" | "thousands" | "millions" | "billions";
@@ -55,6 +46,8 @@ export interface VisualSettings {
     titleText: string;
     titleFontSize: number;
     deltaSuffix: string;
+    comparisonSuffix: string;
+    showComparisonValue: boolean;
     targetLineColor: string;
     bulletGoodColor: string;
     bulletMidColor: string;
@@ -68,8 +61,6 @@ export interface VisualSettings {
     borderColor: string;
     deltaBadgeStyle: DeltaBadgeStyle;
     deltaShowArrow: boolean;
-    enableAnimation: boolean;
-    animationDuration: number;
     useGradient: boolean;
     gaugeMinValue: number;
     gaugeMaxValue: number;
@@ -79,23 +70,15 @@ export interface VisualSettings {
 
 const kpiVariants: powerbi.IEnumMember[] = [
     { value: "default", displayName: "Default" },
-    { value: "progress", displayName: "Progress" },
-    { value: "microchart", displayName: "Microchart" },
     { value: "area", displayName: "Area" },
     { value: "bars", displayName: "Bars" },
-    { value: "barsLine", displayName: "Bars + Line" },
+    { value: "progress", displayName: "Progress Bar" },
     { value: "bullet", displayName: "Bullet" },
     { value: "donut", displayName: "Donut" },
-    { value: "lollipop", displayName: "Lollipop" },
-    { value: "dual", displayName: "Dual" },
-    { value: "callout", displayName: "Callout" },
-    { value: "stackedCompare", displayName: "Stacked Compare" },
     { value: "gauge", displayName: "Gauge" },
-    { value: "waterfall", displayName: "Waterfall" },
-    { value: "heatStrip", displayName: "Heat Strip" },
-    { value: "comparison", displayName: "Comparison" },
-    { value: "radial", displayName: "Radial" }
+    { value: "comparison", displayName: "Comparison" }
 ];
+const allowedKpiVariants = new Set<KpiVariant>(kpiVariants.map((item) => item.value as KpiVariant));
 
 const labelPositions: powerbi.IEnumMember[] = [
     { value: "top", displayName: "top" },
@@ -324,12 +307,32 @@ class TitleSubtitleCardSettings extends FormattingSettingsCard {
         name: "deltaSuffix",
         displayName: "deltaSuffix",
         placeholder: "",
-        value: ""
+        value: "vs PY"
+    });
+
+    comparisonSuffix = new formattingSettings.TextInput({
+        name: "comparisonSuffix",
+        displayName: "comparisonSuffix",
+        placeholder: "",
+        value: "año anterior"
+    });
+
+    showComparisonValue = new formattingSettings.ToggleSwitch({
+        name: "showComparisonValue",
+        displayName: "showComparisonValue",
+        value: true
     });
 
     name: string = "titleSubtitle";
     displayName: string = "Title & Subtitle";
-    slices: Array<FormattingSettingsSlice> = [this.showTitle, this.titleText, this.titleFontSize, this.deltaSuffix];
+    slices: Array<FormattingSettingsSlice> = [
+        this.showTitle,
+        this.titleText,
+        this.titleFontSize,
+        this.deltaSuffix,
+        this.comparisonSuffix,
+        this.showComparisonValue
+    ];
 }
 
 class BulletDonutCardSettings extends FormattingSettingsCard {
@@ -479,28 +482,6 @@ class DeltaStyleCardSettings extends FormattingSettingsCard {
     slices: Array<FormattingSettingsSlice> = [this.deltaBadgeStyle, this.deltaShowArrow];
 }
 
-class AnimationCardSettings extends FormattingSettingsCard {
-    enableAnimation = new formattingSettings.ToggleSwitch({
-        name: "enableAnimation",
-        displayName: "enableAnimation",
-        value: true
-    });
-
-    animationDuration = new formattingSettings.NumUpDown({
-        name: "animationDuration",
-        displayName: "animationDuration",
-        value: 250,
-        options: {
-            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 0 },
-            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 1000 }
-        }
-    });
-
-    name: string = "animation";
-    displayName: string = "Animation";
-    slices: Array<FormattingSettingsSlice> = [this.enableAnimation, this.animationDuration];
-}
-
 export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     kpiStyleCard = new KpiStyleCardSettings();
     colorsCard = new ColorsCardSettings();
@@ -511,14 +492,12 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     themeCard = new ThemeCardSettings();
     cardStyleCard = new CardStyleCardSettings();
     deltaStyleCard = new DeltaStyleCardSettings();
-    animationCard = new AnimationCardSettings();
 
     cards = [
         this.kpiStyleCard,
         this.themeCard,
         this.cardStyleCard,
         this.deltaStyleCard,
-        this.animationCard,
         this.colorsCard,
         this.textCard,
         this.miniChartCard,
@@ -528,8 +507,9 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
 }
 
 export function getVisualSettings(model: VisualFormattingSettingsModel): VisualSettings {
+    const selectedVariant = model.kpiStyleCard.kpiVariant.value.value as KpiVariant;
     return {
-        kpiVariant: model.kpiStyleCard.kpiVariant.value.value as KpiVariant,
+        kpiVariant: allowedKpiVariants.has(selectedVariant) ? selectedVariant : "default",
         labelPosition: model.kpiStyleCard.labelPosition.value.value as LabelPosition,
         valueColor: model.colorsCard.valueColor.value.value,
         positiveColor: model.colorsCard.positiveColor.value.value,
@@ -551,6 +531,8 @@ export function getVisualSettings(model: VisualFormattingSettingsModel): VisualS
         titleText: model.titleSubtitleCard.titleText.value,
         titleFontSize: Math.max(8, model.titleSubtitleCard.titleFontSize.value),
         deltaSuffix: model.titleSubtitleCard.deltaSuffix.value,
+        comparisonSuffix: model.titleSubtitleCard.comparisonSuffix.value,
+        showComparisonValue: model.titleSubtitleCard.showComparisonValue.value,
         targetLineColor: model.bulletDonutCard.targetLineColor.value.value,
         bulletGoodColor: model.bulletDonutCard.bulletGoodColor.value.value,
         bulletMidColor: model.bulletDonutCard.bulletMidColor.value.value,
@@ -564,8 +546,6 @@ export function getVisualSettings(model: VisualFormattingSettingsModel): VisualS
         borderColor: model.cardStyleCard.borderColor.value.value,
         deltaBadgeStyle: model.deltaStyleCard.deltaBadgeStyle.value.value as DeltaBadgeStyle,
         deltaShowArrow: model.deltaStyleCard.deltaShowArrow.value,
-        enableAnimation: model.animationCard.enableAnimation.value,
-        animationDuration: Math.max(0, Math.min(1000, Math.round(model.animationCard.animationDuration.value))),
         useGradient: model.miniChartCard.useGradient.value,
         gaugeMinValue: model.bulletDonutCard.gaugeMinValue.value,
         gaugeMaxValue: model.bulletDonutCard.gaugeMaxValue.value,

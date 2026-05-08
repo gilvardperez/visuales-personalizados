@@ -1,7 +1,7 @@
 {
   "name": "kpi-design-studio-visual",
   "description": "KPI Design Studio custom visual para Power BI",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/gilvardperez/Visuales-Personalizados"
