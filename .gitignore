@@ -3,3 +3,6 @@
 **/dist/
 *.log
 .DS_Store
+
+visual/webpack.statistics*.html
+visual/.vscode/
