@@ -12,8 +12,10 @@ export function renderBulletKpi(container: HTMLElement, data: KpiRenderData, set
     const card = clearAndCreateCard(container, "bullet");
     appendTopSection(card, data, settings, viewport);
 
-    const ratio = Math.max(0, data.progressRatio ?? 0);
-    const clampedRatio = Math.min(1.4, ratio);
+    const targetValue = data.comparison && data.comparison > 0 ? data.comparison : data.value;
+    const maxScale = Math.max(1, data.value, targetValue);
+    const actualPercent = (Math.max(0, data.value) / maxScale) * 100;
+    const targetPercent = (Math.max(0, targetValue) / maxScale) * 100;
 
     const chart = document.createElement("div");
     chart.className = "kpi-bullet";
@@ -35,12 +37,12 @@ export function renderBulletKpi(container: HTMLElement, data: KpiRenderData, set
 
     const actual = document.createElement("div");
     actual.className = "kpi-bullet-actual";
-    actual.style.width = `${Math.min(100, clampedRatio * 100)}%`;
+    actual.style.width = `${Math.min(100, actualPercent)}%`;
     actual.style.backgroundColor = settings.progressColor;
 
     const target = document.createElement("div");
     target.className = "kpi-bullet-target";
-    target.style.left = `${Math.min(100, (data.comparison && data.comparison !== 0 ? 1 : clampedRatio) * 100)}%`;
+    target.style.left = `${Math.min(100, targetPercent)}%`;
     target.style.backgroundColor = settings.targetLineColor;
 
     chart.appendChild(bad);
