@@ -73,5 +73,5 @@ function computeDeltaFromSeries(points: KpiRenderData["trendPoints"]): number {
         return 0;
     }
 
-    return ((last - previous) / Math.abs(previous)) * 100;
+    return ((last - previous) / previous) * 100;
 }
