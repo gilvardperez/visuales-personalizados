@@ -1,0 +1,185 @@
+{
+  "dataRoles": [
+    {
+      "name": "value",
+      "displayName": "Value",
+      "kind": "Measure"
+    },
+    {
+      "name": "comparison",
+      "displayName": "Comparison",
+      "kind": "Measure"
+    },
+    {
+      "name": "trend",
+      "displayName": "Trend",
+      "kind": "Grouping"
+    },
+    {
+      "name": "trendValues",
+      "displayName": "Trend Values",
+      "kind": "Measure"
+    }
+  ],
+  "objects": {
+    "kpiStyle": {
+      "displayName": "KPI Style",
+      "properties": {
+        "kpiVariant": {
+          "displayName": "Variant",
+          "type": {
+            "enumeration": [
+              { "value": "default" },
+              { "value": "progress" },
+              { "value": "microchart" }
+            ]
+          }
+        },
+        "labelPosition": {
+          "displayName": "Label position",
+          "type": {
+            "enumeration": [
+              { "value": "top" },
+              { "value": "bottom" }
+            ]
+          }
+        }
+      }
+    },
+    "colors": {
+      "displayName": "Colors",
+      "properties": {
+        "valueColor": {
+          "displayName": "Value",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "positiveColor": {
+          "displayName": "Positive",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "negativeColor": {
+          "displayName": "Negative",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "progressColor": {
+          "displayName": "Progress",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "successColor": {
+          "displayName": "Success",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "text": {
+      "displayName": "Text",
+      "properties": {
+        "valueFontSize": {
+          "displayName": "Value font size",
+          "type": {
+            "formatting": {
+              "fontSize": true
+            }
+          }
+        },
+        "labelFontSize": {
+          "displayName": "Label font size",
+          "type": {
+            "formatting": {
+              "fontSize": true
+            }
+          }
+        },
+        "displayUnits": {
+          "displayName": "Display units",
+          "type": {
+            "enumeration": [
+              { "value": "auto" },
+              { "value": "thousands" },
+              { "value": "millions" },
+              { "value": "billions" }
+            ]
+          }
+        },
+        "decimalPlaces": {
+          "displayName": "Decimal places",
+          "type": {
+            "numeric": true
+          }
+        }
+      }
+    }
+  },
+  "dataViewMappings": [
+    {
+      "conditions": [
+        {
+          "value": { "max": 1 },
+          "comparison": { "max": 1 },
+          "trend": { "max": 1 },
+          "trendValues": { "max": 1 }
+        }
+      ],
+      "categorical": {
+        "categories": {
+          "for": {
+            "in": "trend"
+          },
+          "dataReductionAlgorithm": {
+            "top": {}
+          }
+        },
+        "values": {
+          "select": [
+            {
+              "bind": {
+                "to": "value"
+              }
+            },
+            {
+              "bind": {
+                "to": "comparison"
+              }
+            },
+            {
+              "bind": {
+                "to": "trendValues"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "privileges": []
+}

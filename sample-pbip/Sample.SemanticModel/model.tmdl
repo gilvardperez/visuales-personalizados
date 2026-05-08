@@ -1,0 +1,43 @@
+createOrReplace
+
+model Sample
+culture: es-ES
+defaultPowerBIDataSourceVersion: powerBI_V3
+
+table Sales
+column Date
+dataType: dateTime
+column Actual
+dataType: decimal
+column Target
+dataType: decimal
+column Previous
+dataType: decimal
+
+measure 'Total Actual' = SUM ( Sales[Actual] )
+measure 'Total Target' = SUM ( Sales[Target] )
+measure 'Total Previous' = SUM ( Sales[Previous] )
+
+partition Sales = m
+mode: import
+source =
+let
+Source = #table(
+type table [Date=date, Actual=number, Target=number, Previous=number],
+{
+{#date(2025, 1, 1), 120000, 110000, 102000},
+{#date(2025, 2, 1), 128000, 112000, 120000},
+{#date(2025, 3, 1), 131500, 118000, 128000},
+{#date(2025, 4, 1), 126000, 120000, 131500},
+{#date(2025, 5, 1), 139000, 124000, 126000},
+{#date(2025, 6, 1), 146500, 130000, 139000},
+{#date(2025, 7, 1), 151200, 135000, 146500},
+{#date(2025, 8, 1), 149800, 138000, 151200},
+{#date(2025, 9, 1), 157300, 142000, 149800},
+{#date(2025, 10, 1), 163000, 148000, 157300},
+{#date(2025, 11, 1), 168400, 152000, 163000},
+{#date(2025, 12, 1), 176900, 160000, 168400}
+}
+)
+in
+Source
