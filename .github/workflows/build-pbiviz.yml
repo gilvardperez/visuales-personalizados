@@ -1,0 +1,53 @@
+name: Build and Release PBIVIZ
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install pbiviz tools
+        run: npm install -g powerbi-visuals-tools@latest
+
+      - name: Install dependencies
+        working-directory: visual
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Install dev certificate
+        run: pbiviz --install-cert || true
+
+      - name: Build pbiviz package
+        id: build
+        working-directory: visual
+        run: pbiviz package
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pbiviz-package
+          path: visual/dist/*.pbiviz
+          if-no-files-found: warn
+
+      - name: Publish rolling latest release
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: latest
+          prerelease: true
+          target_commitish: ${{ github.sha }}
+          files: visual/dist/*.pbiviz
