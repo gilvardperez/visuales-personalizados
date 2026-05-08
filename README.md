@@ -6,12 +6,21 @@ Proyecto de visual personalizado (`pbiviz`) con 3 diseños iniciales de KPI Card
 - `progress`: valor + barra de progreso vs objetivo.
 - `microchart`: valor + sparkline (línea) con serie temporal.
 
+## ⬇️ Descargar el visual (forma fácil)
+
+1. Ve a la pestaña **[Releases](https://github.com/gilvardperez/Visuales-Personalizados/releases)** del repositorio.
+2. Descarga el archivo `kpiDesignStudio.X.X.X.pbiviz` de la release más reciente (o la `latest`).
+3. Abre **Power BI Desktop** → panel **Visualizaciones** (lado derecho) → clic en los **tres puntos `…`** → **"Importar un objeto visual desde un archivo"** → selecciona el `.pbiviz` descargado.
+4. ✅ El visual aparece en tu panel de visualizaciones, listo para arrastrar al lienzo.
+
+> No necesitas instalar Node.js ni nada. GitHub Actions compila el visual automáticamente en cada cambio.
+
 ## Estructura del repositorio
 
 - `visual/`: proyecto del custom visual (TypeScript + D3).
 - `sample-pbip/`: ejemplo PBIP con modelo y reporte de muestra.
 
-## Requisitos previos
+## 🛠️ Build manual (solo para contribuidores)
 
 - Node.js 18+
 - Instalar CLI de visuales:
@@ -25,8 +34,6 @@ npm i -g powerbi-visuals-tools@latest
 ```bash
 pbiviz --install-cert
 ```
-
-## Build
 
 ```bash
 cd visual
