@@ -61,13 +61,11 @@ export interface VisualSettings {
     borderColor: string;
     deltaBadgeStyle: DeltaBadgeStyle;
     deltaShowArrow: boolean;
-    useGradient: boolean;
     gaugeMinValue: number;
     gaugeMaxValue: number;
     gaugeRedThreshold: number;
     gaugeYellowThreshold: number;
 }
-
 const kpiVariants: powerbi.IEnumMember[] = [
     { value: "default", displayName: "Default" },
     { value: "area", displayName: "Area" },
@@ -266,7 +264,7 @@ class MiniChartCardSettings extends FormattingSettingsCard {
     useGradient = new formattingSettings.ToggleSwitch({
         name: "useGradient",
         displayName: "useGradient",
-        value: true
+        value: false
     });
 
     name: string = "miniChart";
@@ -278,8 +276,7 @@ class MiniChartCardSettings extends FormattingSettingsCard {
         this.chartHeight,
         this.barColor,
         this.lineColor,
-        this.areaFillOpacity,
-        this.useGradient
+        this.areaFillOpacity
     ];
 }
 
@@ -546,7 +543,6 @@ export function getVisualSettings(model: VisualFormattingSettingsModel): VisualS
         borderColor: model.cardStyleCard.borderColor.value.value,
         deltaBadgeStyle: model.deltaStyleCard.deltaBadgeStyle.value.value as DeltaBadgeStyle,
         deltaShowArrow: model.deltaStyleCard.deltaShowArrow.value,
-        useGradient: model.miniChartCard.useGradient.value,
         gaugeMinValue: model.bulletDonutCard.gaugeMinValue.value,
         gaugeMaxValue: model.bulletDonutCard.gaugeMaxValue.value,
         gaugeRedThreshold: model.bulletDonutCard.gaugeRedThreshold.value,

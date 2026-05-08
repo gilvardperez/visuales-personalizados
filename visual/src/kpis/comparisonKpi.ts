@@ -1,6 +1,6 @@
 import { KpiRenderData } from "./types";
 import { VisualSettings } from "../settings";
-import { applyCardContainer, formatValue, getViewport, renderHeader, renderNoData, resolveTheme } from "./_shared";
+import { applyCardContainer, buildChartBlock, clamp, formatValue, getViewport, renderDeltaBadge, renderHeader, renderNoData, resolveTheme } from "./_shared";
 
 export function renderComparisonKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
     if (!data) {
@@ -12,47 +12,76 @@ export function renderComparisonKpi(container: HTMLElement, data: KpiRenderData,
     const theme = resolveTheme(settings, viewport);
     const card = applyCardContainer(container, settings, theme, "comparison");
 
-    renderHeader(card, data.label, settings.titleText, settings, theme, viewport);
+    const { label } = renderHeader(card, data.label, settings.titleText, settings, theme, viewport);
+    const topRow = document.createElement("div");
+    topRow.className = "kpi-top-row";
+    topRow.appendChild(label);
+    renderDeltaBadge(topRow, data.deltaRaw, settings, theme, data.deltaText);
+    card.appendChild(topRow);
 
-    const target = Math.max(1, data.comparison ?? data.value);
-    const actualRatio = Math.max(0, Math.min(1, data.value / target));
+    const target = data.comparison !== null && data.comparison !== undefined && data.comparison > 0
+        ? data.comparison
+        : Math.max(1, data.value);
+
+    const bigger = Math.max(data.value, target);
+    const actualRatio = clamp(data.value / bigger, 0, 1);
+    const targetRatio = clamp(target / bigger, 0, 1);
+
+    const accentColor = settings.progressColor || theme.accent;
+
+    const chartBlock = buildChartBlock(card);
+    chartBlock.style.justifyContent = "center";
 
     const chart = document.createElement("div");
     chart.className = "kpi-comparison-chart";
-    chart.appendChild(buildRow("Actual", actualRatio, settings.progressColor || theme.accent, formatValue(data.value, settings)));
-    chart.appendChild(buildRow("Meta", 1, theme.border, formatValue(target, settings)));
-    card.appendChild(chart);
+    chart.style.gap = "10px";
+    chart.appendChild(buildBar("ACTUAL", actualRatio, accentColor, data.valueText));
+    chart.appendChild(buildBar("META", targetRatio, theme.border, formatValue(target, settings), theme.textSecondary));
+    chartBlock.appendChild(chart);
 
-    const diff = document.createElement("div");
-    diff.className = "kpi-comparison-diff";
+    // Absolute + percentage difference
     if (data.deltaRaw !== undefined && Number.isFinite(data.deltaRaw)) {
-        const positive = data.deltaRaw >= 0;
-        const sign = positive ? "+" : "";
-        const arrow = settings.deltaShowArrow ? (positive ? "▲" : "▼") : "";
-        diff.style.color = positive ? theme.positive : theme.negative;
-        diff.textContent = `${arrow ? `${arrow} ` : ""}${sign}${(data.deltaRaw * 100).toFixed(settings.decimalPlaces)}%`;
+        const diff = document.createElement("div");
+        diff.className = "kpi-comparison-diff";
+        const isPositive = data.deltaRaw >= 0;
+        const arrow = settings.deltaShowArrow ? (isPositive ? "▲" : "▼") : "";
+        const sign = isPositive ? "+" : "";
+        const absDiff = Math.abs(data.value - target);
+        const absText = formatValue(absDiff, settings);
+        const pctText = `${sign}${(data.deltaRaw * 100).toFixed(settings.decimalPlaces)}%`;
+        diff.textContent = `${arrow ? `${arrow} ` : ""}${sign}${absText} (${pctText})`;
+        diff.style.color = isPositive ? theme.positive : theme.negative;
+        chartBlock.appendChild(diff);
     }
-    card.appendChild(diff);
 }
 
-function buildRow(label: string, ratio: number, barColor: string, valueText: string): HTMLDivElement {
-    const row = document.createElement("div");
-    row.className = "kpi-comparison-row";
+function buildBar(label: string, ratio: number, fillColor: string, valueText: string, textColor?: string): HTMLDivElement {
+    const wrap = document.createElement("div");
+    wrap.className = "kpi-comparison-bar-wrap";
 
-    const labelEl = document.createElement("span");
+    const labelEl = document.createElement("div");
+    labelEl.className = "kpi-comparison-bar-label";
     labelEl.textContent = label;
+    wrap.appendChild(labelEl);
 
-    const track = document.createElement("div");
+    const outer = document.createElement("div");
+    outer.className = "kpi-comparison-bar-outer";
+
     const fill = document.createElement("div");
-    fill.style.width = `${Math.max(0, Math.min(1, ratio)) * 100}%`;
-    fill.style.background = barColor;
-    track.appendChild(fill);
+    fill.className = "kpi-comparison-bar-fill";
+    fill.style.width = `${Math.max(4, ratio * 100)}%`;
+    fill.style.backgroundColor = fillColor;
 
-    const value = document.createElement("strong");
-    value.textContent = valueText;
+    const valEl = document.createElement("div");
+    valEl.className = "kpi-comparison-bar-value";
+    valEl.textContent = valueText;
+    if (textColor) {
+        valEl.style.color = textColor;
+    }
 
-    row.appendChild(labelEl);
-    row.appendChild(track);
-    row.appendChild(value);
-    return row;
+    fill.appendChild(valEl);
+    outer.appendChild(fill);
+    wrap.appendChild(outer);
+    return wrap;
 }
+
