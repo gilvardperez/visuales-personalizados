@@ -1,6 +1,6 @@
 import { KpiRenderData } from "./types";
 import { VisualSettings } from "../settings";
-import { appendTopSection, clearAndCreateCard, getViewport, renderNoData } from "./_shared";
+import { appendTopSection, applyCardContainer, getViewport, renderNoData, resolveTheme } from "./_shared";
 
 export function renderCalloutKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
     if (!data) {
@@ -9,9 +9,8 @@ export function renderCalloutKpi(container: HTMLElement, data: KpiRenderData, se
     }
 
     const viewport = getViewport(container);
-    const card = clearAndCreateCard(container, "callout");
-    card.style.borderLeftColor = data.isDeltaPositive ? settings.positiveColor : settings.negativeColor;
-
-    const section = appendTopSection(card, data, settings, viewport);
-    section.delta.classList.add("kpi-callout-badge");
+    const theme = resolveTheme(settings, viewport);
+    const card = applyCardContainer(container, settings, theme, "callout");
+    card.style.setProperty("--kpi-accent-left", data.isDeltaPositive ? theme.positive : theme.negative);
+    appendTopSection(card, data, settings, viewport, false, theme);
 }

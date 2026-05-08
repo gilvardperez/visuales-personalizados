@@ -1,6 +1,6 @@
 import { KpiRenderData } from "./types";
 import { VisualSettings } from "../settings";
-import { appendTopSection, clearAndCreateCard, getViewport, renderNoData } from "./_shared";
+import { appendTopSection, getViewport, renderNoData, resolveTheme, applyCardContainer } from "./_shared";
 
 export function renderDefaultKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
     if (!data) {
@@ -9,6 +9,7 @@ export function renderDefaultKpi(container: HTMLElement, data: KpiRenderData, se
     }
 
     const viewport = getViewport(container);
-    const card = clearAndCreateCard(container, "default");
-    appendTopSection(card, data, settings, viewport);
+    const theme = resolveTheme(settings, viewport);
+    const card = applyCardContainer(container, settings, theme, "default");
+    appendTopSection(card, data, settings, viewport, false, theme);
 }

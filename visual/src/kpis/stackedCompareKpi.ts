@@ -3,13 +3,16 @@ import { KpiRenderData } from "./types";
 import { VisualSettings } from "../settings";
 import {
     appendTopSection,
-    clearAndCreateCard,
-    clamp,
-    formatNumber,
+    applyAnimation,
+    applyCardContainer,
+    formatValue,
+    getChartHeight,
     getViewport,
     renderLastValueLabel,
     renderMonthLabels,
-    renderNoData
+    renderNoData,
+    resolveTheme,
+    shouldHideMiniChart
 } from "./_shared";
 
 export function renderStackedCompareKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
@@ -19,10 +22,11 @@ export function renderStackedCompareKpi(container: HTMLElement, data: KpiRenderD
     }
 
     const viewport = getViewport(container);
-    const card = clearAndCreateCard(container, "stacked-compare");
-    appendTopSection(card, data, settings, viewport);
+    const theme = resolveTheme(settings, viewport);
+    const card = applyCardContainer(container, settings, theme, "stacked-compare");
+    appendTopSection(card, data, settings, viewport, false, theme);
 
-    if (!data.trendPoints.length) {
+    if (!data.trendPoints.length || shouldHideMiniChart(viewport)) {
         return;
     }
 
@@ -30,9 +34,8 @@ export function renderStackedCompareKpi(container: HTMLElement, data: KpiRenderD
     host.className = "kpi-chart-host";
     card.appendChild(host);
 
-    const width = Math.max(160, viewport.width - 24);
-    const chartHeight = clamp(settings.chartHeight, 20, 200);
-    const height = Math.min(chartHeight, Math.max(62, Math.floor(viewport.height * 0.55)));
+    const width = Math.max(120, viewport.width - 30);
+    const height = getChartHeight(settings, viewport, 0.55, 62);
 
     const svg = d3.select(host)
         .append("svg")
@@ -61,7 +64,10 @@ export function renderStackedCompareKpi(container: HTMLElement, data: KpiRenderD
         .attr("y", (d) => yScale(d.primary))
         .attr("width", xScale.bandwidth())
         .attr("height", (d) => Math.max(1, height - 20 - yScale(d.primary)))
-        .attr("fill", settings.barColor);
+        .attr("fill", settings.barColor || theme.accent)
+        .each(function () {
+            applyAnimation(this as SVGRectElement, "bar", settings);
+        });
 
     if (data.hasTrendComparison && data.trendComparisonPoints.length) {
         svg.selectAll("rect.kpi-stack-secondary")
@@ -72,7 +78,10 @@ export function renderStackedCompareKpi(container: HTMLElement, data: KpiRenderD
             .attr("y", (d) => yScale(d.primary + d.secondary))
             .attr("width", xScale.bandwidth())
             .attr("height", (d) => Math.max(1, yScale(d.primary) - yScale(d.primary + d.secondary)))
-            .attr("fill", "#9CA3AF");
+            .attr("fill", theme.neutral)
+            .each(function () {
+                applyAnimation(this as SVGRectElement, "bar", settings);
+            });
     }
 
     if (settings.highlightLastPoint) {
@@ -94,7 +103,7 @@ export function renderStackedCompareKpi(container: HTMLElement, data: KpiRenderD
         const last = data.trendPoints[lastIndex];
         const x = (xScale(lastIndex) ?? 0) + xScale.bandwidth() / 2;
         const y = yScale(Math.max(0, last.y));
-        renderLastValueLabel(svg, x, y, formatNumber(last.y, settings), settings.highlightColor);
+        renderLastValueLabel(svg, x, y, formatValue(last.y, settings), settings.highlightColor);
     }
 
     renderMonthLabels(svg, data.trendPoints, (index) => (xScale(index) ?? 0) + xScale.bandwidth() / 2, height);

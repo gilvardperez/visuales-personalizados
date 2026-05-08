@@ -1,6 +1,6 @@
 import { KpiRenderData } from "./types";
 import { VisualSettings } from "../settings";
-import { appendTopSection, clearAndCreateCard, getViewport, renderNoData } from "./_shared";
+import { appendTopSection, applyCardContainer, getViewport, renderNoData, resolveTheme } from "./_shared";
 
 export function renderBulletKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
     if (!data) {
@@ -9,8 +9,9 @@ export function renderBulletKpi(container: HTMLElement, data: KpiRenderData, set
     }
 
     const viewport = getViewport(container);
-    const card = clearAndCreateCard(container, "bullet");
-    appendTopSection(card, data, settings, viewport);
+    const theme = resolveTheme(settings, viewport);
+    const card = applyCardContainer(container, settings, theme, "bullet");
+    appendTopSection(card, data, settings, viewport, false, theme);
 
     const targetValue = data.comparison && data.comparison > 0 ? data.comparison : data.value;
     const maxScale = Math.max(1, data.value, targetValue);
@@ -38,7 +39,7 @@ export function renderBulletKpi(container: HTMLElement, data: KpiRenderData, set
     const actual = document.createElement("div");
     actual.className = "kpi-bullet-actual";
     actual.style.width = `${Math.min(100, actualPercent)}%`;
-    actual.style.backgroundColor = settings.progressColor;
+    actual.style.backgroundColor = theme.accent;
 
     const target = document.createElement("div");
     target.className = "kpi-bullet-target";

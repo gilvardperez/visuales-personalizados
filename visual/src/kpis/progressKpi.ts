@@ -1,6 +1,6 @@
 import { KpiRenderData } from "./types";
 import { VisualSettings } from "../settings";
-import { appendTopSection, clearAndCreateCard, getViewport, renderNoData } from "./_shared";
+import { appendTopSection, applyAnimation, applyCardContainer, getViewport, renderNoData, resolveTheme } from "./_shared";
 
 export function renderProgressKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
     if (!data) {
@@ -9,8 +9,9 @@ export function renderProgressKpi(container: HTMLElement, data: KpiRenderData, s
     }
 
     const viewport = getViewport(container);
-    const card = clearAndCreateCard(container, "progress");
-    appendTopSection(card, data, settings, viewport);
+    const theme = resolveTheme(settings, viewport);
+    const card = applyCardContainer(container, settings, theme, "progress");
+    appendTopSection(card, data, settings, viewport, false, theme);
 
     const ratio = Math.max(0, data.progressRatio ?? 0);
     const displayRatio = Math.min(ratio, 1);
@@ -21,7 +22,9 @@ export function renderProgressKpi(container: HTMLElement, data: KpiRenderData, s
     const fill = document.createElement("div");
     fill.className = "kpi-progress-fill";
     fill.style.width = `${displayRatio * 100}%`;
-    fill.style.backgroundColor = ratio > 1 ? settings.successColor : settings.progressColor;
+    fill.style.backgroundColor = ratio > 1 ? theme.positive : theme.accent;
+    applyAnimation(fill, "bar", settings);
+
     track.appendChild(fill);
 
     const text = document.createElement("div");

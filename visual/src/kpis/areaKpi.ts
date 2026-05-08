@@ -3,13 +3,18 @@ import { KpiRenderData } from "./types";
 import { VisualSettings } from "../settings";
 import {
     appendTopSection,
-    clearAndCreateCard,
-    clamp,
-    formatNumber,
+    applyAnimation,
+    applyCardContainer,
+    createGradient,
+    createUniqueId,
+    formatValue,
+    getChartHeight,
     getViewport,
     renderLastValueLabel,
     renderMonthLabels,
-    renderNoData
+    renderNoData,
+    resolveTheme,
+    shouldHideMiniChart
 } from "./_shared";
 
 export function renderAreaKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
@@ -19,10 +24,11 @@ export function renderAreaKpi(container: HTMLElement, data: KpiRenderData, setti
     }
 
     const viewport = getViewport(container);
-    const card = clearAndCreateCard(container, "area");
-    appendTopSection(card, data, settings, viewport);
+    const theme = resolveTheme(settings, viewport);
+    const card = applyCardContainer(container, settings, theme, "area");
+    appendTopSection(card, data, settings, viewport, false, theme);
 
-    if (!data.trendPoints.length) {
+    if (!data.trendPoints.length || shouldHideMiniChart(viewport)) {
         return;
     }
 
@@ -30,9 +36,8 @@ export function renderAreaKpi(container: HTMLElement, data: KpiRenderData, setti
     host.className = "kpi-chart-host";
     card.appendChild(host);
 
-    const width = Math.max(160, viewport.width - 24);
-    const chartHeight = clamp(settings.chartHeight, 20, 200);
-    const height = Math.min(chartHeight, Math.max(56, Math.floor(viewport.height * 0.52)));
+    const width = Math.max(120, viewport.width - 30);
+    const height = getChartHeight(settings, viewport, 0.52, 56);
 
     const svg = d3.select(host)
         .append("svg")
@@ -61,20 +66,24 @@ export function renderAreaKpi(container: HTMLElement, data: KpiRenderData, setti
 
     svg.append("path")
         .datum(data.trendPoints)
-        .attr("fill", settings.progressColor)
-        .attr("fill-opacity", clamp(settings.areaFillOpacity, 0, 1))
+        .attr("fill", settings.useGradient
+            ? createGradient(svg, createUniqueId('area'), settings.progressColor || theme.accent)
+            : (settings.progressColor || theme.accent))
+        .attr("fill-opacity", settings.useGradient ? 1 : settings.areaFillOpacity)
         .attr("d", area);
 
-    svg.append("path")
+    const linePath = svg.append("path")
         .datum(data.trendPoints)
         .attr("fill", "none")
-        .attr("stroke", settings.lineColor)
+        .attr("stroke", settings.lineColor || theme.accent)
         .attr("stroke-width", 2)
         .attr("d", line);
 
+    applyAnimation(linePath.node() as SVGPathElement, "line", settings);
+
     const lastIndex = data.trendPoints.length - 1;
     const last = data.trendPoints[lastIndex];
-    const markerColor = settings.highlightLastPoint ? settings.highlightColor : settings.lineColor;
+    const markerColor = settings.highlightLastPoint ? settings.highlightColor : (settings.lineColor || theme.accent);
 
     svg.append("circle")
         .attr("cx", xScale(lastIndex))
@@ -83,7 +92,7 @@ export function renderAreaKpi(container: HTMLElement, data: KpiRenderData, setti
         .attr("fill", markerColor);
 
     if (settings.showLastValueLabel) {
-        renderLastValueLabel(svg, xScale(lastIndex), yScale(last.y), formatNumber(last.y, settings), markerColor);
+        renderLastValueLabel(svg, xScale(lastIndex), yScale(last.y), formatValue(last.y, settings), markerColor);
     }
 
     renderMonthLabels(svg, data.trendPoints, (index) => xScale(index), height);
