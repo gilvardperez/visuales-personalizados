@@ -57,7 +57,7 @@ export function renderBarsKpi(container: HTMLElement, data: KpiRenderData, setti
         .padding(0.15);
 
     const maxActual = d3.max(data.trendPoints, (d) => d.y) ?? 0;
-    const domainMax = Math.max(1, maxActual, data.comparison ?? 0) * 1.05;
+    const domainMax = Math.max(1, maxActual, data.comparison ?? 0) * 1.05; // 5% headroom above tallest bar
     const yScale = d3.scaleLinear().domain([0, domainMax]).range([plotH, 2]);
 
     const barColor = settings.barColor || theme.accent;

@@ -70,7 +70,7 @@ export function renderAreaKpi(container: HTMLElement, data: KpiRenderData, setti
         minY = minY - 1;
         maxY = maxY + 1;
     }
-    const yPad = (maxY - minY) * 0.1;
+    const yPad = (maxY - minY) * 0.1; // 10% vertical padding so line/area doesn't clip at edges
     const yScale = d3.scaleLinear()
         .domain([minY - yPad, maxY + yPad])
         .range([plotH, 4]);

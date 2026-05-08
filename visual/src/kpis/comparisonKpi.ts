@@ -69,7 +69,7 @@ function buildBar(label: string, ratio: number, fillColor: string, valueText: st
 
     const fill = document.createElement("div");
     fill.className = "kpi-comparison-bar-fill";
-    fill.style.width = `${Math.max(4, ratio * 100)}%`;
+    fill.style.width = `${Math.max(4, ratio * 100)}%`; // 4% min ensures bar is always visible
     fill.style.backgroundColor = fillColor;
 
     const valEl = document.createElement("div");

@@ -128,8 +128,10 @@ export function computeChartHeight(
     viewport: { width: number; height: number },
     hasSubtitle: boolean = true
 ): number {
-    const cardPadding = 26; // 2 × 12px + small buffer
-    const topRowH = 22; // label (uppercase small) + delta
+    // These constants estimate the non-chart top section height to compute remaining space.
+    // Keep in sync with visual.less: kpi-card padding (12px top+bottom), kpi-top-row height, kpi-value line-height.
+    const cardPadding = 26; // 2 × 12px card padding + 2px buffer
+    const topRowH = 22; // label uppercase + delta badge
     const valueH = responsiveFont(settings.valueFontSize, viewport, 18, 86) * 1.15;
     const subtitleH = hasSubtitle && data.comparison !== null ? 20 : 0;
     const minH = 48;

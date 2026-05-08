@@ -99,7 +99,7 @@ export function renderGaugeKpi(container: HTMLElement, data: KpiRenderData, sett
         .attr("fill", theme.textPrimary);
 
     // % logro — displayed below the pivot (in the open space below the arc base)
-    const pct = (rawValue).toFixed(settings.decimalPlaces);
+    const pct = rawValue.toFixed(settings.decimalPlaces);
     svg.append("text")
         .attr("x", cx)
         .attr("y", cy + 20)
