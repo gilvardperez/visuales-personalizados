@@ -31,7 +31,7 @@ export function render(container: HTMLElement, data: KpiRenderData, settings: Vi
 
     const progressText = document.createElement("div");
     progressText.className = "kpi-progress-text";
-    progressText.textContent = `${(ratio * 100).toFixed(settings.decimalPlaces)}% cumplimiento`;
+    progressText.textContent = `${(ratio * 100).toFixed(settings.decimalPlaces)}%`;
 
     if (settings.labelPosition === "top") {
         wrapper.appendChild(label);
