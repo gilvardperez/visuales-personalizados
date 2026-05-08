@@ -45,7 +45,12 @@
               { "value": "lollipop" },
               { "value": "dual" },
               { "value": "callout" },
-              { "value": "stackedCompare" }
+              { "value": "stackedCompare" },
+              { "value": "gauge" },
+              { "value": "waterfall" },
+              { "value": "heatStrip" },
+              { "value": "comparison" },
+              { "value": "radial" }
             ]
           }
         },
@@ -58,6 +63,66 @@
             ]
           }
         }
+      }
+    },
+    "theme": {
+      "displayName": "Theme",
+      "properties": {
+        "theme": {
+          "displayName": "Theme",
+          "type": {
+            "enumeration": [
+              { "value": "light" },
+              { "value": "dark" },
+              { "value": "auto" }
+            ]
+          }
+        },
+        "transparentBackground": {
+          "displayName": "Transparent background",
+          "type": { "bool": true }
+        }
+      }
+    },
+    "cardStyle": {
+      "displayName": "Card Style",
+      "properties": {
+        "cardStyle": {
+          "displayName": "Card style",
+          "type": {
+            "enumeration": [
+              { "value": "flat" },
+              { "value": "bordered" },
+              { "value": "accent-left" }
+            ]
+          }
+        },
+        "cornerRadius": { "displayName": "Corner radius", "type": { "numeric": true } },
+        "accentColor": { "displayName": "Accent color", "type": { "fill": { "solid": { "color": true } } } },
+        "borderColor": { "displayName": "Border color", "type": { "fill": { "solid": { "color": true } } } }
+      }
+    },
+    "deltaStyle": {
+      "displayName": "Delta Style",
+      "properties": {
+        "deltaBadgeStyle": {
+          "displayName": "Delta badge style",
+          "type": {
+            "enumeration": [
+              { "value": "text" },
+              { "value": "badge" },
+              { "value": "pill" }
+            ]
+          }
+        },
+        "deltaShowArrow": { "displayName": "Show arrow", "type": { "bool": true } }
+      }
+    },
+    "animation": {
+      "displayName": "Animation",
+      "properties": {
+        "enableAnimation": { "displayName": "Enable animation", "type": { "bool": true } },
+        "animationDuration": { "displayName": "Animation duration (ms)", "type": { "numeric": true } }
       }
     },
     "colors": {
@@ -122,7 +187,8 @@
         "chartHeight": { "displayName": "Chart height", "type": { "numeric": true } },
         "barColor": { "displayName": "Bar color", "type": { "fill": { "solid": { "color": true } } } },
         "lineColor": { "displayName": "Line color", "type": { "fill": { "solid": { "color": true } } } },
-        "areaFillOpacity": { "displayName": "Area fill opacity", "type": { "numeric": true } }
+        "areaFillOpacity": { "displayName": "Area fill opacity", "type": { "numeric": true } },
+        "useGradient": { "displayName": "Use gradient", "type": { "bool": true } }
       }
     },
     "titleSubtitle": {
@@ -141,7 +207,11 @@
         "bulletGoodColor": { "displayName": "Bullet good color", "type": { "fill": { "solid": { "color": true } } } },
         "bulletMidColor": { "displayName": "Bullet mid color", "type": { "fill": { "solid": { "color": true } } } },
         "bulletBadColor": { "displayName": "Bullet bad color", "type": { "fill": { "solid": { "color": true } } } },
-        "donutThickness": { "displayName": "Donut thickness", "type": { "numeric": true } }
+        "donutThickness": { "displayName": "Donut thickness", "type": { "numeric": true } },
+        "gaugeMinValue": { "displayName": "Gauge min value", "type": { "numeric": true } },
+        "gaugeMaxValue": { "displayName": "Gauge max value", "type": { "numeric": true } },
+        "gaugeRedThreshold": { "displayName": "Gauge red threshold", "type": { "numeric": true } },
+        "gaugeYellowThreshold": { "displayName": "Gauge yellow threshold", "type": { "numeric": true } }
       }
     }
   },

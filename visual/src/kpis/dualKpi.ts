@@ -1,6 +1,14 @@
 import { KpiRenderData } from "./types";
 import { VisualSettings } from "../settings";
-import { buildTitle, clearAndCreateCard, formatNumber, getViewport, renderNoData } from "./_shared";
+import {
+    applyCardContainer,
+    formatValue,
+    getViewport,
+    renderDeltaBadge,
+    renderHeader,
+    renderNoData,
+    resolveTheme
+} from "./_shared";
 
 export function renderDualKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
     if (!data) {
@@ -9,12 +17,9 @@ export function renderDualKpi(container: HTMLElement, data: KpiRenderData, setti
     }
 
     const viewport = getViewport(container);
-    const card = clearAndCreateCard(container, "dual");
-
-    const title = buildTitle(settings, viewport);
-    if (title) {
-        card.appendChild(title);
-    }
+    const theme = resolveTheme(settings, viewport);
+    const card = applyCardContainer(container, settings, theme, "dual");
+    renderHeader(card, data.label, settings.titleText, settings, theme, viewport);
 
     const dual = document.createElement("div");
     dual.className = "kpi-dual-grid";
@@ -30,31 +35,21 @@ export function renderDualKpi(container: HTMLElement, data: KpiRenderData, setti
     primary.appendChild(primaryLabel);
     primary.appendChild(primaryValue);
 
-    const comparisonLabel = data.comparison !== null ? "Comparison" : "Secondary";
-    const secondaryValue = data.comparison !== null ? formatNumber(data.comparison, settings) : "—";
     const secondary = document.createElement("div");
     secondary.className = "kpi-dual-item";
     const secondaryLabel = document.createElement("div");
     secondaryLabel.className = "kpi-dual-label";
-    secondaryLabel.textContent = comparisonLabel;
-    const secondaryValueEl = document.createElement("div");
-    secondaryValueEl.className = "kpi-dual-value";
-    secondaryValueEl.textContent = secondaryValue;
+    secondaryLabel.textContent = data.comparison !== null ? "Target" : "Secondary";
+    const secondaryValue = document.createElement("div");
+    secondaryValue.className = "kpi-dual-value";
+    secondaryValue.textContent = data.comparison !== null ? formatValue(data.comparison, settings) : "—";
     secondary.appendChild(secondaryLabel);
-    secondary.appendChild(secondaryValueEl);
+    secondary.appendChild(secondaryValue);
+
+    renderDeltaBadge(primary, data.deltaRaw, settings, theme, data.deltaText);
 
     const trendDelta = computeDeltaFromSeries(data.trendPoints);
-    const comparisonDelta = data.trendComparisonPoints.length ? computeDeltaFromSeries(data.trendComparisonPoints) : trendDelta;
-
-    const primaryDelta = document.createElement("div");
-    primaryDelta.className = `kpi-dual-delta ${trendDelta >= 0 ? "is-pos" : "is-neg"}`;
-    primaryDelta.textContent = `${trendDelta >= 0 ? "+" : ""}${trendDelta.toFixed(settings.decimalPlaces)}%`;
-    primary.appendChild(primaryDelta);
-
-    const secondaryDelta = document.createElement("div");
-    secondaryDelta.className = `kpi-dual-delta ${comparisonDelta >= 0 ? "is-pos" : "is-neg"}`;
-    secondaryDelta.textContent = `${comparisonDelta >= 0 ? "+" : ""}${comparisonDelta.toFixed(settings.decimalPlaces)}%`;
-    secondary.appendChild(secondaryDelta);
+    renderDeltaBadge(secondary, trendDelta, settings, theme, `${trendDelta >= 0 ? "+" : ""}${(trendDelta * 100).toFixed(settings.decimalPlaces)}%`);
 
     dual.appendChild(primary);
     dual.appendChild(secondary);
@@ -73,5 +68,5 @@ function computeDeltaFromSeries(points: KpiRenderData["trendPoints"]): number {
         return 0;
     }
 
-    return ((last - previous) / previous) * 100;
+    return (last - previous) / previous;
 }

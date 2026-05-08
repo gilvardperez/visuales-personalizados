@@ -1,19 +1,34 @@
 # KPI Design Studio para Power BI
 
-Proyecto de visual personalizado (`pbiviz`) con 12 variantes de KPI Cards:
+Proyecto de visual personalizado (`pbiviz`) con 17 variantes de KPI Cards:
 
 1. `default` — valor principal + delta vs comparación.
 2. `progress` — valor + barra de progreso vs objetivo.
 3. `microchart` — valor + sparkline + meses + etiqueta de último valor.
-4. `area` — valor + delta + área sombreada de tendencia.
+4. `area` — valor + delta + área de tendencia.
 5. `bars` — valor + mini barras mensuales con último resaltado.
 6. `barsLine` — barras de fondo + línea combinada.
 7. `bullet` — bullet chart horizontal (actual vs target).
 8. `donut` — anillo de cumplimiento con porcentaje central.
 9. `lollipop` — mini lollipop chart mensual.
 10. `dual` — dos sub-KPIs lado a lado.
-11. `callout` — card con borde lateral y delta tipo badge.
+11. `callout` — card con borde lateral y delta destacado.
 12. `stackedCompare` — barras apiladas comparando dos series.
+13. `gauge` — semicirculo tipo velocímetro con aguja y umbrales.
+14. `waterfall` — mini cascada mensual (positivo/negativo).
+15. `heatStrip` — tira de 12 celdas por intensidad de valor.
+16. `comparison` — barras horizontales Actual vs Target con diferencia.
+17. `radial` — anillo radial de cumplimiento estilo fitness.
+
+## Novedades v0.3.0
+
+- Tema global `light` / `dark` / `auto`.
+- Cards nuevas de formato: **Theme**, **Card Style**, **Delta Style**, **Animation**.
+- `cardStyle`: `flat`, `bordered`, `accent-left`.
+- `deltaBadgeStyle`: `text`, `badge`, `pill` (default `badge`).
+- `useGradient` en mini charts y nuevas variantes.
+- Animaciones de entrada opcionales (`enableAnimation`, `animationDuration`).
+- Sin sombras (`box-shadow`, `drop-shadow`, `text-shadow`) para mantener estilo flat.
 
 ## Estructura del repositorio
 
@@ -73,7 +88,7 @@ Luego habilita **Developer visual** en Power BI Service/Desktop según tu flujo 
 
 ## Mini guía visual rápida
 
-- 🟥 **Cards ejecutivas**: `default`, `callout`, `dual`
-- 📈 **Tendencia**: `microchart`, `area`, `barsLine`, `lollipop`
-- 📊 **Comparativo**: `bars`, `stackedCompare`, `bullet`
-- 🍩 **Cumplimiento**: `progress`, `donut`
+- 🟥 **Cards ejecutivas**: `default`, `callout`, `dual`, `comparison`
+- 📈 **Tendencia**: `microchart`, `area`, `barsLine`, `lollipop`, `waterfall`, `heatStrip`
+- 📊 **Comparativo**: `bars`, `stackedCompare`, `bullet`, `gauge`
+- 🍩 **Cumplimiento**: `progress`, `donut`, `radial`

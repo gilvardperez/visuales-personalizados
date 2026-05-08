@@ -19,10 +19,18 @@ export type KpiVariant =
     | "lollipop"
     | "dual"
     | "callout"
-    | "stackedCompare";
+    | "stackedCompare"
+    | "gauge"
+    | "waterfall"
+    | "heatStrip"
+    | "comparison"
+    | "radial";
 
 export type LabelPosition = "top" | "bottom";
 export type DisplayUnits = "auto" | "thousands" | "millions" | "billions";
+export type ThemeMode = "light" | "dark" | "auto";
+export type CardStyleMode = "flat" | "bordered" | "accent-left";
+export type DeltaBadgeStyle = "text" | "badge" | "pill";
 
 export interface VisualSettings {
     kpiVariant: KpiVariant;
@@ -52,6 +60,21 @@ export interface VisualSettings {
     bulletMidColor: string;
     bulletBadColor: string;
     donutThickness: number;
+    theme: ThemeMode;
+    transparentBackground: boolean;
+    cardStyle: CardStyleMode;
+    cornerRadius: number;
+    accentColor: string;
+    borderColor: string;
+    deltaBadgeStyle: DeltaBadgeStyle;
+    deltaShowArrow: boolean;
+    enableAnimation: boolean;
+    animationDuration: number;
+    useGradient: boolean;
+    gaugeMinValue: number;
+    gaugeMaxValue: number;
+    gaugeRedThreshold: number;
+    gaugeYellowThreshold: number;
 }
 
 const kpiVariants: powerbi.IEnumMember[] = [
@@ -66,7 +89,12 @@ const kpiVariants: powerbi.IEnumMember[] = [
     { value: "lollipop", displayName: "Lollipop" },
     { value: "dual", displayName: "Dual" },
     { value: "callout", displayName: "Callout" },
-    { value: "stackedCompare", displayName: "Stacked Compare" }
+    { value: "stackedCompare", displayName: "Stacked Compare" },
+    { value: "gauge", displayName: "Gauge" },
+    { value: "waterfall", displayName: "Waterfall" },
+    { value: "heatStrip", displayName: "Heat Strip" },
+    { value: "comparison", displayName: "Comparison" },
+    { value: "radial", displayName: "Radial" }
 ];
 
 const labelPositions: powerbi.IEnumMember[] = [
@@ -79,6 +107,24 @@ const displayUnits: powerbi.IEnumMember[] = [
     { value: "thousands", displayName: "thousands" },
     { value: "millions", displayName: "millions" },
     { value: "billions", displayName: "billions" }
+];
+
+const themes: powerbi.IEnumMember[] = [
+    { value: "light", displayName: "light" },
+    { value: "dark", displayName: "dark" },
+    { value: "auto", displayName: "auto" }
+];
+
+const cardStyles: powerbi.IEnumMember[] = [
+    { value: "flat", displayName: "flat" },
+    { value: "bordered", displayName: "bordered" },
+    { value: "accent-left", displayName: "accent-left" }
+];
+
+const deltaBadgeStyles: powerbi.IEnumMember[] = [
+    { value: "text", displayName: "text" },
+    { value: "badge", displayName: "badge" },
+    { value: "pill", displayName: "pill" }
 ];
 
 class KpiStyleCardSettings extends FormattingSettingsCard {
@@ -105,31 +151,31 @@ class ColorsCardSettings extends FormattingSettingsCard {
     valueColor = new formattingSettings.ColorPicker({
         name: "valueColor",
         displayName: "valueColor",
-        value: { value: "#111111" }
+        value: { value: "#111827" }
     });
 
     positiveColor = new formattingSettings.ColorPicker({
         name: "positiveColor",
         displayName: "positiveColor",
-        value: { value: "#16A34A" }
+        value: { value: "#10B981" }
     });
 
     negativeColor = new formattingSettings.ColorPicker({
         name: "negativeColor",
         displayName: "negativeColor",
-        value: { value: "#E74C3C" }
+        value: { value: "#EF4444" }
     });
 
     progressColor = new formattingSettings.ColorPicker({
         name: "progressColor",
         displayName: "progressColor",
-        value: { value: "#0078D4" }
+        value: { value: "#2563EB" }
     });
 
     successColor = new formattingSettings.ColorPicker({
         name: "successColor",
         displayName: "successColor",
-        value: { value: "#16A34A" }
+        value: { value: "#10B981" }
     });
 
     name: string = "colors";
@@ -147,7 +193,7 @@ class TextCardSettings extends FormattingSettingsCard {
     valueFontSize = new formattingSettings.NumUpDown({
         name: "valueFontSize",
         displayName: "valueFontSize",
-        value: 32
+        value: 34
     });
 
     labelFontSize = new formattingSettings.NumUpDown({
@@ -199,7 +245,7 @@ class MiniChartCardSettings extends FormattingSettingsCard {
     highlightColor = new formattingSettings.ColorPicker({
         name: "highlightColor",
         displayName: "highlightColor",
-        value: { value: "#0078D4" }
+        value: { value: "#2563EB" }
     });
 
     chartHeight = new formattingSettings.NumUpDown({
@@ -215,23 +261,29 @@ class MiniChartCardSettings extends FormattingSettingsCard {
     barColor = new formattingSettings.ColorPicker({
         name: "barColor",
         displayName: "barColor",
-        value: { value: "#E74C3C" }
+        value: { value: "#2563EB" }
     });
 
     lineColor = new formattingSettings.ColorPicker({
         name: "lineColor",
         displayName: "lineColor",
-        value: { value: "#111111" }
+        value: { value: "#2563EB" }
     });
 
     areaFillOpacity = new formattingSettings.NumUpDown({
         name: "areaFillOpacity",
         displayName: "areaFillOpacity",
-        value: 0.15,
+        value: 0.2,
         options: {
             minValue: { type: powerbi.visuals.ValidatorType.Min, value: 0 },
             maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 1 }
         }
+    });
+
+    useGradient = new formattingSettings.ToggleSwitch({
+        name: "useGradient",
+        displayName: "useGradient",
+        value: true
     });
 
     name: string = "miniChart";
@@ -243,7 +295,8 @@ class MiniChartCardSettings extends FormattingSettingsCard {
         this.chartHeight,
         this.barColor,
         this.lineColor,
-        this.areaFillOpacity
+        this.areaFillOpacity,
+        this.useGradient
     ];
 }
 
@@ -283,7 +336,7 @@ class BulletDonutCardSettings extends FormattingSettingsCard {
     targetLineColor = new formattingSettings.ColorPicker({
         name: "targetLineColor",
         displayName: "targetLineColor",
-        value: { value: "#111111" }
+        value: { value: "#111827" }
     });
 
     bulletGoodColor = new formattingSettings.ColorPicker({
@@ -314,6 +367,30 @@ class BulletDonutCardSettings extends FormattingSettingsCard {
         }
     });
 
+    gaugeMinValue = new formattingSettings.NumUpDown({
+        name: "gaugeMinValue",
+        displayName: "gaugeMinValue",
+        value: 0
+    });
+
+    gaugeMaxValue = new formattingSettings.NumUpDown({
+        name: "gaugeMaxValue",
+        displayName: "gaugeMaxValue",
+        value: 100
+    });
+
+    gaugeRedThreshold = new formattingSettings.NumUpDown({
+        name: "gaugeRedThreshold",
+        displayName: "gaugeRedThreshold",
+        value: 50
+    });
+
+    gaugeYellowThreshold = new formattingSettings.NumUpDown({
+        name: "gaugeYellowThreshold",
+        displayName: "gaugeYellowThreshold",
+        value: 80
+    });
+
     name: string = "bulletDonut";
     displayName: string = "Bullet/Donut";
     slices: Array<FormattingSettingsSlice> = [
@@ -321,8 +398,107 @@ class BulletDonutCardSettings extends FormattingSettingsCard {
         this.bulletGoodColor,
         this.bulletMidColor,
         this.bulletBadColor,
-        this.donutThickness
+        this.donutThickness,
+        this.gaugeMinValue,
+        this.gaugeMaxValue,
+        this.gaugeRedThreshold,
+        this.gaugeYellowThreshold
     ];
+}
+
+class ThemeCardSettings extends FormattingSettingsCard {
+    theme = new formattingSettings.ItemDropdown({
+        name: "theme",
+        displayName: "theme",
+        items: themes,
+        value: themes[0]
+    });
+
+    transparentBackground = new formattingSettings.ToggleSwitch({
+        name: "transparentBackground",
+        displayName: "transparentBackground",
+        value: false
+    });
+
+    name: string = "theme";
+    displayName: string = "Theme";
+    slices: Array<FormattingSettingsSlice> = [this.theme, this.transparentBackground];
+}
+
+class CardStyleCardSettings extends FormattingSettingsCard {
+    cardStyle = new formattingSettings.ItemDropdown({
+        name: "cardStyle",
+        displayName: "cardStyle",
+        items: cardStyles,
+        value: cardStyles[1]
+    });
+
+    cornerRadius = new formattingSettings.NumUpDown({
+        name: "cornerRadius",
+        displayName: "cornerRadius",
+        value: 12,
+        options: {
+            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 0 },
+            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 32 }
+        }
+    });
+
+    accentColor = new formattingSettings.ColorPicker({
+        name: "accentColor",
+        displayName: "accentColor",
+        value: { value: "#2563EB" }
+    });
+
+    borderColor = new formattingSettings.ColorPicker({
+        name: "borderColor",
+        displayName: "borderColor",
+        value: { value: "#E5E7EB" }
+    });
+
+    name: string = "cardStyle";
+    displayName: string = "Card Style";
+    slices: Array<FormattingSettingsSlice> = [this.cardStyle, this.cornerRadius, this.accentColor, this.borderColor];
+}
+
+class DeltaStyleCardSettings extends FormattingSettingsCard {
+    deltaBadgeStyle = new formattingSettings.ItemDropdown({
+        name: "deltaBadgeStyle",
+        displayName: "deltaBadgeStyle",
+        items: deltaBadgeStyles,
+        value: deltaBadgeStyles[1]
+    });
+
+    deltaShowArrow = new formattingSettings.ToggleSwitch({
+        name: "deltaShowArrow",
+        displayName: "deltaShowArrow",
+        value: true
+    });
+
+    name: string = "deltaStyle";
+    displayName: string = "Delta Style";
+    slices: Array<FormattingSettingsSlice> = [this.deltaBadgeStyle, this.deltaShowArrow];
+}
+
+class AnimationCardSettings extends FormattingSettingsCard {
+    enableAnimation = new formattingSettings.ToggleSwitch({
+        name: "enableAnimation",
+        displayName: "enableAnimation",
+        value: true
+    });
+
+    animationDuration = new formattingSettings.NumUpDown({
+        name: "animationDuration",
+        displayName: "animationDuration",
+        value: 250,
+        options: {
+            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 0 },
+            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 1000 }
+        }
+    });
+
+    name: string = "animation";
+    displayName: string = "Animation";
+    slices: Array<FormattingSettingsSlice> = [this.enableAnimation, this.animationDuration];
 }
 
 export class VisualFormattingSettingsModel extends FormattingSettingsModel {
@@ -332,9 +508,17 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     miniChartCard = new MiniChartCardSettings();
     titleSubtitleCard = new TitleSubtitleCardSettings();
     bulletDonutCard = new BulletDonutCardSettings();
+    themeCard = new ThemeCardSettings();
+    cardStyleCard = new CardStyleCardSettings();
+    deltaStyleCard = new DeltaStyleCardSettings();
+    animationCard = new AnimationCardSettings();
 
     cards = [
         this.kpiStyleCard,
+        this.themeCard,
+        this.cardStyleCard,
+        this.deltaStyleCard,
+        this.animationCard,
         this.colorsCard,
         this.textCard,
         this.miniChartCard,
@@ -352,8 +536,8 @@ export function getVisualSettings(model: VisualFormattingSettingsModel): VisualS
         negativeColor: model.colorsCard.negativeColor.value.value,
         progressColor: model.colorsCard.progressColor.value.value,
         successColor: model.colorsCard.successColor.value.value,
-        valueFontSize: Math.max(8, model.textCard.valueFontSize.value),
-        labelFontSize: Math.max(8, model.textCard.labelFontSize.value),
+        valueFontSize: Math.max(10, model.textCard.valueFontSize.value),
+        labelFontSize: Math.max(10, model.textCard.labelFontSize.value),
         displayUnits: model.textCard.displayUnits.value.value as DisplayUnits,
         decimalPlaces: Math.max(0, Math.min(4, Math.round(model.textCard.decimalPlaces.value))),
         showLastValueLabel: model.miniChartCard.showLastValueLabel.value,
@@ -371,6 +555,21 @@ export function getVisualSettings(model: VisualFormattingSettingsModel): VisualS
         bulletGoodColor: model.bulletDonutCard.bulletGoodColor.value.value,
         bulletMidColor: model.bulletDonutCard.bulletMidColor.value.value,
         bulletBadColor: model.bulletDonutCard.bulletBadColor.value.value,
-        donutThickness: Math.max(4, Math.min(40, model.bulletDonutCard.donutThickness.value))
+        donutThickness: Math.max(4, Math.min(40, model.bulletDonutCard.donutThickness.value)),
+        theme: model.themeCard.theme.value.value as ThemeMode,
+        transparentBackground: model.themeCard.transparentBackground.value,
+        cardStyle: model.cardStyleCard.cardStyle.value.value as CardStyleMode,
+        cornerRadius: Math.max(0, Math.min(32, Math.round(model.cardStyleCard.cornerRadius.value))),
+        accentColor: model.cardStyleCard.accentColor.value.value,
+        borderColor: model.cardStyleCard.borderColor.value.value,
+        deltaBadgeStyle: model.deltaStyleCard.deltaBadgeStyle.value.value as DeltaBadgeStyle,
+        deltaShowArrow: model.deltaStyleCard.deltaShowArrow.value,
+        enableAnimation: model.animationCard.enableAnimation.value,
+        animationDuration: Math.max(0, Math.min(1000, Math.round(model.animationCard.animationDuration.value))),
+        useGradient: model.miniChartCard.useGradient.value,
+        gaugeMinValue: model.bulletDonutCard.gaugeMinValue.value,
+        gaugeMaxValue: model.bulletDonutCard.gaugeMaxValue.value,
+        gaugeRedThreshold: model.bulletDonutCard.gaugeRedThreshold.value,
+        gaugeYellowThreshold: model.bulletDonutCard.gaugeYellowThreshold.value
     };
 }

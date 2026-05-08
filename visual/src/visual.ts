@@ -25,6 +25,11 @@ import { renderLollipopKpi } from "./kpis/lollipopKpi";
 import { renderDualKpi } from "./kpis/dualKpi";
 import { renderCalloutKpi } from "./kpis/calloutKpi";
 import { renderStackedCompareKpi } from "./kpis/stackedCompareKpi";
+import { renderGaugeKpi } from "./kpis/gaugeKpi";
+import { renderWaterfallKpi } from "./kpis/waterfallKpi";
+import { renderHeatStripKpi } from "./kpis/heatStripKpi";
+import { renderComparisonKpi } from "./kpis/comparisonKpi";
+import { renderRadialKpi } from "./kpis/radialKpi";
 
 export class Visual implements IVisual {
     private hostElement: HTMLElement;
@@ -93,6 +98,21 @@ export class Visual implements IVisual {
                 break;
             case "stackedCompare":
                 renderStackedCompareKpi(this.hostElement, renderData, settings);
+                break;
+            case "gauge":
+                renderGaugeKpi(this.hostElement, renderData, settings);
+                break;
+            case "waterfall":
+                renderWaterfallKpi(this.hostElement, renderData, settings);
+                break;
+            case "heatStrip":
+                renderHeatStripKpi(this.hostElement, renderData, settings);
+                break;
+            case "comparison":
+                renderComparisonKpi(this.hostElement, renderData, settings);
+                break;
+            case "radial":
+                renderRadialKpi(this.hostElement, renderData, settings);
                 break;
             default:
                 renderDefaultKpi(this.hostElement, renderData, settings);

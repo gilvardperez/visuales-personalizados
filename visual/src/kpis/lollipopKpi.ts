@@ -3,13 +3,15 @@ import { KpiRenderData } from "./types";
 import { VisualSettings } from "../settings";
 import {
     appendTopSection,
-    clearAndCreateCard,
-    clamp,
-    formatNumber,
+    applyCardContainer,
+    formatValue,
+    getChartHeight,
     getViewport,
     renderLastValueLabel,
     renderMonthLabels,
-    renderNoData
+    renderNoData,
+    resolveTheme,
+    shouldHideMiniChart
 } from "./_shared";
 
 export function renderLollipopKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
@@ -19,10 +21,11 @@ export function renderLollipopKpi(container: HTMLElement, data: KpiRenderData, s
     }
 
     const viewport = getViewport(container);
-    const card = clearAndCreateCard(container, "lollipop");
-    appendTopSection(card, data, settings, viewport);
+    const theme = resolveTheme(settings, viewport);
+    const card = applyCardContainer(container, settings, theme, "lollipop");
+    appendTopSection(card, data, settings, viewport, false, theme);
 
-    if (!data.trendPoints.length) {
+    if (!data.trendPoints.length || shouldHideMiniChart(viewport)) {
         return;
     }
 
@@ -30,9 +33,8 @@ export function renderLollipopKpi(container: HTMLElement, data: KpiRenderData, s
     host.className = "kpi-chart-host";
     card.appendChild(host);
 
-    const width = Math.max(160, viewport.width - 24);
-    const chartHeight = clamp(settings.chartHeight, 20, 200);
-    const height = Math.min(chartHeight, Math.max(62, Math.floor(viewport.height * 0.55)));
+    const width = Math.max(120, viewport.width - 30);
+    const height = getChartHeight(settings, viewport, 0.55, 62);
 
     const svg = d3.select(host)
         .append("svg")
@@ -52,7 +54,7 @@ export function renderLollipopKpi(container: HTMLElement, data: KpiRenderData, s
         .attr("x2", (_, index) => (xScale(index) ?? 0) + xScale.bandwidth() / 2)
         .attr("y1", height - 20)
         .attr("y2", (d) => yScale(Math.max(0, d.y)))
-        .attr("stroke", "#CBD5E1")
+        .attr("stroke", theme.border)
         .attr("stroke-width", 2);
 
     svg.selectAll("circle.kpi-lollipop-dot")
@@ -62,14 +64,14 @@ export function renderLollipopKpi(container: HTMLElement, data: KpiRenderData, s
         .attr("cx", (_, index) => (xScale(index) ?? 0) + xScale.bandwidth() / 2)
         .attr("cy", (d) => yScale(Math.max(0, d.y)))
         .attr("r", (_, index) => (index === data.trendPoints.length - 1 ? 4 : 3))
-        .attr("fill", (_, index) => settings.highlightLastPoint && index === data.trendPoints.length - 1 ? settings.highlightColor : settings.barColor);
+        .attr("fill", (_, index) => settings.highlightLastPoint && index === data.trendPoints.length - 1 ? settings.highlightColor : (settings.barColor || theme.accent));
 
     if (settings.showLastValueLabel) {
         const lastIndex = data.trendPoints.length - 1;
         const last = data.trendPoints[lastIndex];
         const x = (xScale(lastIndex) ?? 0) + xScale.bandwidth() / 2;
         const y = yScale(Math.max(0, last.y));
-        renderLastValueLabel(svg, x, y, formatNumber(last.y, settings), settings.highlightLastPoint ? settings.highlightColor : settings.barColor);
+        renderLastValueLabel(svg, x, y, formatValue(last.y, settings), settings.highlightLastPoint ? settings.highlightColor : (settings.barColor || theme.accent));
     }
 
     renderMonthLabels(svg, data.trendPoints, (index) => (xScale(index) ?? 0) + xScale.bandwidth() / 2, height);
