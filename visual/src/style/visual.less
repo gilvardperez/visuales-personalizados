@@ -1,55 +1,173 @@
 .kpi-card {
-    font-family: "Segoe UI", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     padding: 12px;
     display: flex;
     flex-direction: column;
     gap: 6px;
     height: 100%;
+    width: 100%;
     box-sizing: border-box;
+    background: #ffffff;
+    color: #111111;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.kpi-title {
+    color: #6b7280;
+    font-weight: 600;
+    letter-spacing: 0.02em;
 }
 
 .kpi-label {
-    color: #6b6b6b;
+    color: #6b7280;
     font-weight: 500;
 }
 
 .kpi-value {
-    font-weight: 600;
-    line-height: 1.1;
+    font-weight: 700;
+    line-height: 1.05;
+    color: #111111;
+    word-break: break-word;
 }
 
 .kpi-delta {
     font-size: 12px;
-    font-weight: 600;
-}
-
-.kpi-progress-track {
-    width: 100%;
-    height: 10px;
-    background: #e5e5e5;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.kpi-progress-fill {
-    height: 100%;
-    border-radius: 10px;
-}
-
-.kpi-progress-text {
-    font-size: 12px;
-    color: #5a5a5a;
+    font-weight: 700;
 }
 
 .kpi-value-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
     gap: 8px;
 }
 
-.kpi-microchart-host {
+.kpi-chart-host {
     margin-top: auto;
+}
+
+.kpi-month-label {
+    fill: #9ca3af;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.kpi-last-value text {
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.kpi-progress-track {
+    width: 100%;
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.kpi-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+}
+
+.kpi-progress-text {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.kpi-callout {
+    border-left: 4px solid #0078d4;
+    border-radius: 8px;
+}
+
+.kpi-callout-badge {
+    align-self: flex-start;
+    background: #f3f4f6;
+    border-radius: 999px;
+    padding: 3px 8px;
+}
+
+.kpi-bullet {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 18px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.kpi-bullet-band {
+    height: 100%;
+}
+
+.kpi-bullet-actual {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.kpi-bullet-target {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    transform: translateX(-1px);
+}
+
+.kpi-donut-host {
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
+}
+
+.kpi-donut-value {
+    fill: #111111;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.kpi-dual-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.kpi-dual-item {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.kpi-dual-label {
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.kpi-dual-value {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.kpi-dual-delta {
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.kpi-dual-delta.is-pos {
+    color: #16a34a;
+}
+
+.kpi-dual-delta.is-neg {
+    color: #e74c3c;
 }
 
 .kpi-no-data {
@@ -58,6 +176,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #6b6b6b;
-    font-family: "Segoe UI", sans-serif;
+    color: #6b7280;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
 }

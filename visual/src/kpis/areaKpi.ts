@@ -2,10 +2,7 @@ import * as d3 from "d3";
 import { KpiRenderData } from "./types";
 import { VisualSettings } from "../settings";
 import {
-    buildDelta,
-    buildLabel,
-    buildTitle,
-    buildValue,
+    appendTopSection,
     clearAndCreateCard,
     clamp,
     formatNumber,
@@ -15,39 +12,17 @@ import {
     renderNoData
 } from "./_shared";
 
-export function renderMicrochartKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
+export function renderAreaKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
     if (!data) {
         renderNoData(container);
         return;
     }
 
     const viewport = getViewport(container);
-    const card = clearAndCreateCard(container, "microchart");
+    const card = clearAndCreateCard(container, "area");
+    appendTopSection(card, data, settings, viewport);
 
-    const title = buildTitle(settings, viewport);
-    if (title) {
-        card.appendChild(title);
-    }
-
-    const row = document.createElement("div");
-    row.className = "kpi-value-row";
-
-    const value = buildValue(data.valueText, settings, viewport);
-    const delta = buildDelta(data, settings, viewport);
-    row.appendChild(value);
-    row.appendChild(delta);
-
-    const label = buildLabel(data.label, settings, viewport);
-    if (settings.labelPosition === "top") {
-        card.appendChild(label);
-        card.appendChild(row);
-    } else {
-        card.appendChild(row);
-        card.appendChild(label);
-    }
-
-    const points = data.trendPoints;
-    if (!points.length) {
+    if (!data.trendPoints.length) {
         return;
     }
 
@@ -57,7 +32,7 @@ export function renderMicrochartKpi(container: HTMLElement, data: KpiRenderData,
 
     const width = Math.max(160, viewport.width - 24);
     const chartHeight = clamp(settings.chartHeight, 20, 200);
-    const height = Math.min(chartHeight, Math.max(52, Math.floor(viewport.height * 0.52)));
+    const height = Math.min(chartHeight, Math.max(56, Math.floor(viewport.height * 0.52)));
 
     const svg = d3.select(host)
         .append("svg")
@@ -65,29 +40,40 @@ export function renderMicrochartKpi(container: HTMLElement, data: KpiRenderData,
         .attr("width", "100%")
         .attr("height", height);
 
-    const xScale = d3.scaleLinear().domain([0, points.length - 1]).range([8, width - 8]);
-    const extent = d3.extent(points, (d) => d.y);
+    const xScale = d3.scaleLinear().domain([0, data.trendPoints.length - 1]).range([8, width - 8]);
+    const extent = d3.extent(data.trendPoints, (d) => d.y);
     const minY = extent[0] ?? 0;
     const maxY = extent[1] ?? 0;
     const yScale = d3.scaleLinear()
         .domain(minY === maxY ? [minY - 1, maxY + 1] : [minY, maxY])
         .range([height - 20, 8]);
 
-    const line = d3.line<typeof points[number]>()
+    const area = d3.area<typeof data.trendPoints[number]>()
+        .x((_, i) => xScale(i))
+        .y0(height - 20)
+        .y1((d) => yScale(d.y))
+        .curve(d3.curveMonotoneX);
+
+    const line = d3.line<typeof data.trendPoints[number]>()
         .x((_, i) => xScale(i))
         .y((d) => yScale(d.y))
         .curve(d3.curveMonotoneX);
 
     svg.append("path")
-        .datum(points)
-        .attr("class", "kpi-line")
+        .datum(data.trendPoints)
+        .attr("fill", settings.progressColor)
+        .attr("fill-opacity", clamp(settings.areaFillOpacity, 0, 1))
+        .attr("d", area);
+
+    svg.append("path")
+        .datum(data.trendPoints)
         .attr("fill", "none")
         .attr("stroke", settings.lineColor)
         .attr("stroke-width", 2)
         .attr("d", line);
 
-    const lastIndex = points.length - 1;
-    const last = points[lastIndex];
+    const lastIndex = data.trendPoints.length - 1;
+    const last = data.trendPoints[lastIndex];
     const markerColor = settings.highlightLastPoint ? settings.highlightColor : settings.lineColor;
 
     svg.append("circle")
@@ -100,5 +86,5 @@ export function renderMicrochartKpi(container: HTMLElement, data: KpiRenderData,
         renderLastValueLabel(svg, xScale(lastIndex), yScale(last.y), formatNumber(last.y, settings), markerColor);
     }
 
-    renderMonthLabels(svg, points, (index) => xScale(index), height);
+    renderMonthLabels(svg, data.trendPoints, (index) => xScale(index), height);
 }

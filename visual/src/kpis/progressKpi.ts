@@ -1,47 +1,33 @@
 import { KpiRenderData } from "./types";
 import { VisualSettings } from "../settings";
+import { appendTopSection, clearAndCreateCard, getViewport, renderNoData } from "./_shared";
 
-export function render(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
-    const wrapper = document.createElement("div");
-    wrapper.className = "kpi-card kpi-progress";
+export function renderProgressKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
+    if (!data) {
+        renderNoData(container);
+        return;
+    }
 
-    const label = document.createElement("div");
-    label.className = "kpi-label";
-    label.textContent = data.label;
-    label.style.fontSize = `${settings.labelFontSize}px`;
-
-    const value = document.createElement("div");
-    value.className = "kpi-value";
-    value.textContent = data.valueText;
-    value.style.fontSize = `${settings.valueFontSize}px`;
-    value.style.color = settings.valueColor;
+    const viewport = getViewport(container);
+    const card = clearAndCreateCard(container, "progress");
+    appendTopSection(card, data, settings, viewport);
 
     const ratio = Math.max(0, data.progressRatio ?? 0);
     const displayRatio = Math.min(ratio, 1);
 
-    const progressTrack = document.createElement("div");
-    progressTrack.className = "kpi-progress-track";
+    const track = document.createElement("div");
+    track.className = "kpi-progress-track";
 
-    const progressFill = document.createElement("div");
-    progressFill.className = "kpi-progress-fill";
-    progressFill.style.width = `${displayRatio * 100}%`;
-    progressFill.style.backgroundColor = ratio > 1 ? settings.successColor : settings.progressColor;
+    const fill = document.createElement("div");
+    fill.className = "kpi-progress-fill";
+    fill.style.width = `${displayRatio * 100}%`;
+    fill.style.backgroundColor = ratio > 1 ? settings.successColor : settings.progressColor;
+    track.appendChild(fill);
 
-    progressTrack.appendChild(progressFill);
+    const text = document.createElement("div");
+    text.className = "kpi-progress-text";
+    text.textContent = `${(ratio * 100).toFixed(settings.decimalPlaces)}%`;
 
-    const progressText = document.createElement("div");
-    progressText.className = "kpi-progress-text";
-    progressText.textContent = `${(ratio * 100).toFixed(settings.decimalPlaces)}%`;
-
-    if (settings.labelPosition === "top") {
-        wrapper.appendChild(label);
-        wrapper.appendChild(value);
-    } else {
-        wrapper.appendChild(value);
-        wrapper.appendChild(label);
-    }
-
-    wrapper.appendChild(progressTrack);
-    wrapper.appendChild(progressText);
-    container.appendChild(wrapper);
+    card.appendChild(track);
+    card.appendChild(text);
 }
