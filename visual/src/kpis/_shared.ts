@@ -18,8 +18,6 @@ export interface ThemeTokens {
     neutral: string;
 }
 
-let gradientCounter = 0;
-
 function toHexUpper(value: string): string {
     return (value || "").trim().toUpperCase();
 }
@@ -120,9 +118,24 @@ export function shouldHideMiniChart(viewport: { width: number; height: number })
     return viewport.height < 110;
 }
 
-export function getChartHeight(settings: VisualSettings, viewport: { width: number; height: number }, ratio: number = 0.42, minHeight: number = 48): number {
-    const chartHeight = clamp(settings.chartHeight, 20, 200);
-    return Math.min(chartHeight, Math.max(minHeight, Math.floor(viewport.height * ratio)));
+/**
+ * Estimate the chart block height by subtracting the top-section from total viewport height.
+ * Used to size SVG viewBoxes so content fills the flex-1 container.
+ */
+export function computeChartHeight(
+    data: KpiRenderData,
+    settings: VisualSettings,
+    viewport: { width: number; height: number },
+    hasSubtitle: boolean = true
+): number {
+    // These constants estimate the non-chart top section height to compute remaining space.
+    // Keep in sync with visual.less: kpi-card padding (12px top+bottom), kpi-top-row height, kpi-value line-height.
+    const cardPadding = 26; // 2 × 12px card padding + 2px buffer
+    const topRowH = 22; // label uppercase + delta badge
+    const valueH = responsiveFont(settings.valueFontSize, viewport, 18, 86) * 1.15;
+    const subtitleH = hasSubtitle && data.comparison !== null ? 20 : 0;
+    const minH = 48;
+    return Math.max(minH, Math.floor(viewport.height - cardPadding - topRowH - valueH - subtitleH));
 }
 
 export function applyCardContainer(
@@ -311,6 +324,60 @@ export function appendTopSection(
     return { value, label, delta, subtitle };
 }
 
+/**
+ * Render the header row (label + delta) and then a row with value + inline meta text.
+ * Used by area, bars, bullet variants.
+ */
+export function appendTopSectionInline(
+    card: HTMLElement,
+    data: KpiRenderData,
+    settings: VisualSettings,
+    viewport: { width: number; height: number },
+    theme: ThemeTokens,
+    metaLabel: string
+): { delta: HTMLDivElement } {
+    const { label } = renderHeader(card, data.label, settings.titleText, settings, theme, viewport);
+
+    const topRow = document.createElement("div");
+    topRow.className = "kpi-top-row";
+    topRow.appendChild(label);
+    const delta = renderDeltaBadge(topRow, data.deltaRaw, settings, theme, data.deltaText);
+    card.appendChild(topRow);
+
+    // Value + meta on the same row
+    const valueRow = document.createElement("div");
+    valueRow.className = "kpi-value-meta-row";
+
+    const value = buildValue(data.valueText, settings, viewport, theme);
+    valueRow.appendChild(value);
+
+    if (metaLabel) {
+        const meta = document.createElement("div");
+        meta.className = "kpi-meta-text";
+        meta.textContent = metaLabel;
+        meta.style.color = theme.textSecondary;
+        valueRow.appendChild(meta);
+    }
+
+    card.appendChild(valueRow);
+
+    if (isCompactViewport(viewport)) {
+        delta.classList.add("kpi-delta-compact");
+    }
+
+    return { delta };
+}
+
+/**
+ * Create a flex-1 chart block div and append it to parent.
+ */
+export function buildChartBlock(parent: HTMLElement): HTMLDivElement {
+    const block = document.createElement("div");
+    block.className = "kpi-chart-block";
+    parent.appendChild(block);
+    return block;
+}
+
 export function monthLabels(points: TrendPoint[]): string[] {
     return points.map((point, index) => toMonthLabel(point.x, index));
 }
@@ -397,69 +464,3 @@ export function formatValue(value: number, settings: VisualSettings): string {
     return `${formatted}${suffix}`;
 }
 
-export function renderLastValueLabel(
-    svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
-    x: number,
-    y: number,
-    text: string,
-    color: string,
-    bounds: { width: number; top: number }
-): void {
-    const labelGroup = svg.append("g").attr("class", "kpi-last-value");
-
-    const textNode = labelGroup.append("text")
-        .attr("x", x)
-        .attr("y", y)
-        .attr("text-anchor", "middle")
-        .attr("fill", color)
-        .text(text);
-
-    const textNodeElement = textNode.node();
-    if (!textNodeElement) {
-        return;
-    }
-
-    const bbox = textNodeElement.getBBox();
-    const halfWidth = (bbox.width + 8) / 2;
-    const safeX = clamp(x, halfWidth + 2, bounds.width - halfWidth - 2);
-    const safeY = Math.max(bounds.top + bbox.height + 8, y);
-
-    textNode
-        .attr("x", safeX)
-        .attr("y", safeY - 6);
-
-    labelGroup.insert("rect", "text")
-        .attr("x", safeX - halfWidth)
-        .attr("y", safeY - bbox.height - 8)
-        .attr("width", bbox.width + 8)
-        .attr("height", bbox.height + 4)
-        .attr("rx", 4)
-        .attr("ry", 4)
-        .attr("fill", colorWithAlpha(color, 0.12))
-        .attr("stroke", colorWithAlpha(color, 0.25));
-}
-
-export function createUniqueId(prefix: string): string {
-    gradientCounter += 1;
-    return `${prefix}-${gradientCounter}`;
-}
-
-export function createGradient(
-    svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
-    id: string,
-    color: string,
-    direction: "vertical" | "horizontal" = "vertical"
-): string {
-    const defs = svg.select("defs").empty() ? svg.append("defs") : svg.select("defs");
-    const gradient = defs.append("linearGradient")
-        .attr("id", id)
-        .attr("x1", "0%")
-        .attr("x2", direction === "horizontal" ? "100%" : "0%")
-        .attr("y1", "0%")
-        .attr("y2", direction === "horizontal" ? "0%" : "100%");
-
-    gradient.append("stop").attr("offset", "0%").attr("stop-color", color).attr("stop-opacity", 0.35);
-    gradient.append("stop").attr("offset", "100%").attr("stop-color", color).attr("stop-opacity", 0);
-
-    return `url(#${id})`;
-}

@@ -12,7 +12,7 @@
     --kpi-accent-left: var(--kpi-accent);
 
     font-family: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
-    padding: 16px;
+    padding: 12px 14px;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -51,9 +51,9 @@
 .kpi-title,
 .kpi-label {
     color: var(--kpi-text-secondary);
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.07em;
 }
 
 .kpi-title {
@@ -65,7 +65,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .kpi-value {
@@ -74,14 +74,14 @@
     color: var(--kpi-text);
     word-break: break-word;
     letter-spacing: -0.02em;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 
 .kpi-subtitle {
     font-size: 12px;
     color: var(--kpi-text-secondary);
     line-height: 1.2;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
 }
 
 .kpi-delta {
@@ -94,7 +94,7 @@
 .kpi-delta-badge {
     border: 1px solid transparent;
     border-radius: 6px;
-    padding: 3px 8px;
+    padding: 2px 7px;
     display: inline-flex;
     align-self: flex-start;
 }
@@ -103,17 +103,52 @@
     border-radius: 999px;
 }
 
+/* Inline value + meta row (for area/bars/bullet) */
+.kpi-value-meta-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 2px;
+    flex-wrap: wrap;
+}
+
+.kpi-meta-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--kpi-text-secondary);
+    white-space: nowrap;
+}
+
+/* Chart block that fills remaining space */
+.kpi-chart-block {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.kpi-chart-block svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Legacy chart host — kept for backward compat */
 .kpi-chart-host {
     margin-top: 0;
     flex: 1;
     min-height: 40px;
+    min-width: 0;
     width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .kpi-chart-host svg {
     display: block;
     width: 100%;
-    height: 100%;
+    flex: 1;
 }
 
 .kpi-month-label {
@@ -128,18 +163,29 @@
     font-weight: 700;
 }
 
+/* Progress variant */
 .kpi-progress-track {
     width: 100%;
-    height: 14px;
+    height: 28px;
     background: var(--kpi-border);
-    border-radius: 999px;
-    overflow: hidden;
-    margin-top: 0;
+    border-radius: 6px;
+    overflow: visible;
+    position: relative;
 }
 
 .kpi-progress-fill {
     height: 100%;
-    border-radius: 999px;
+    border-radius: 6px;
+    position: relative;
+}
+
+.kpi-progress-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--kpi-text-secondary);
+    font-weight: 600;
+    margin-top: 4px;
 }
 
 .kpi-progress-text {
@@ -147,22 +193,23 @@
     color: var(--kpi-text-secondary);
     font-weight: 600;
     text-align: right;
-    margin-top: 6px;
+    margin-top: 4px;
 }
 
+/* Donut / Gauge host */
 .kpi-donut-host {
     margin-top: 0;
     flex: 1;
+    min-height: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 72px;
 }
 
 .kpi-donut-host svg {
+    display: block;
     width: 100%;
     height: 100%;
-    max-width: 180px;
 }
 
 .kpi-donut-value {
@@ -177,44 +224,63 @@
     font-weight: 600;
 }
 
+/* Comparison variant — thick bars */
 .kpi-comparison-chart {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: auto;
+    gap: 10px;
+    flex: 1;
+    min-height: 0;
+    justify-content: center;
 }
 
-.kpi-comparison-row {
-    display: grid;
-    grid-template-columns: 46px 1fr auto;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
+.kpi-comparison-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.kpi-comparison-bar-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     color: var(--kpi-text-secondary);
 }
 
-.kpi-comparison-row > div {
+.kpi-comparison-bar-outer {
     width: 100%;
-    height: 14px;
-    border-radius: 999px;
+    height: 36px;
     background: var(--kpi-border);
+    border-radius: 6px;
     overflow: hidden;
+    position: relative;
 }
 
-.kpi-comparison-row > div > div {
+.kpi-comparison-bar-fill {
     height: 100%;
-    border-radius: 999px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
-.kpi-comparison-row strong {
-    font-size: 12px;
-    color: var(--kpi-text);
+.kpi-comparison-bar-value {
+    font-size: 13px;
+    font-weight: 800;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .kpi-comparison-diff {
-    margin-top: 8px;
-    font-size: 12px;
+    margin-top: 6px;
+    font-size: 13px;
     font-weight: 700;
+    text-align: center;
 }
 
 .kpi-no-data {
@@ -227,3 +293,4 @@
     font-family: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
     font-weight: 600;
 }
+

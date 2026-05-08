@@ -1,7 +1,16 @@
 import * as d3 from "d3";
 import { KpiRenderData } from "./types";
 import { VisualSettings } from "../settings";
-import { appendTopSection, applyCardContainer, getViewport, renderNoData, resolveTheme } from "./_shared";
+import {
+    appendTopSectionInline,
+    applyCardContainer,
+    buildChartBlock,
+    clamp,
+    formatValue,
+    getViewport,
+    renderNoData,
+    resolveTheme
+} from "./_shared";
 
 export function renderBulletKpi(container: HTMLElement, data: KpiRenderData, settings: VisualSettings): void {
     if (!data) {
@@ -12,33 +21,33 @@ export function renderBulletKpi(container: HTMLElement, data: KpiRenderData, set
     const viewport = getViewport(container);
     const theme = resolveTheme(settings, viewport);
     const card = applyCardContainer(container, settings, theme, "bullet");
-    appendTopSection(card, data, settings, viewport, theme, {
-        subtitleOverride: `Meta: ${data.comparisonText ?? "estimada"}`,
-        suppressComparisonSubtitle: true
-    });
+
+    const suffix = settings.comparisonSuffix.trim();
+    const metaLabel = data.comparison !== null && data.comparisonText
+        ? `Meta: ${data.comparisonText}${suffix ? ` ${suffix}` : ""}`
+        : "";
+
+    appendTopSectionInline(card, data, settings, viewport, theme, metaLabel);
 
     const target = data.comparison && data.comparison > 0 ? data.comparison : Math.max(1, data.value * 1.5);
-    const maxScale = Math.max(1, data.value, target) * 1.2;
-    const valueRatio = Math.max(0, Math.min(1, data.value / maxScale));
-    const targetRatio = Math.max(0, Math.min(1, target / maxScale));
+    const domainMax = Math.max(data.value, target) * 1.2;
+    const valueRatio = clamp(data.value / domainMax, 0, 1);
+    const targetRatio = clamp(target / domainMax, 0, 1);
 
-    const host = document.createElement("div");
-    host.className = "kpi-chart-host";
-    card.appendChild(host);
+    const chartBlock = buildChartBlock(card);
+    chartBlock.style.justifyContent = "center";
 
-    const width = Math.max(160, viewport.width - 32);
-    const height = Math.max(44, Math.floor(viewport.height * 0.22));
+    const bulletH = 28;
+    const svgH = bulletH + 18; // room for scale below
+    const width = Math.max(80, viewport.width - 28);
 
-    const svg = d3.select(host)
+    const svg = d3.select(chartBlock)
         .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("viewBox", `0 0 ${width} ${svgH}`)
         .attr("width", "100%")
-        .attr("height", "100%");
+        .attr("height", svgH);
 
-    const y = Math.floor(height / 2) - 8;
-    const trackHeight = 16;
-    const valueHeight = 10;
-
+    // Three background zones: red / yellow / green
     const zones = [
         { from: 0, to: 0.4, color: settings.bulletBadColor },
         { from: 0.4, to: 0.75, color: settings.bulletMidColor },
@@ -48,25 +57,51 @@ export function renderBulletKpi(container: HTMLElement, data: KpiRenderData, set
     zones.forEach((zone) => {
         svg.append("rect")
             .attr("x", zone.from * width)
-            .attr("y", y)
+            .attr("y", 0)
             .attr("width", Math.max(1, (zone.to - zone.from) * width))
-            .attr("height", trackHeight)
+            .attr("height", bulletH)
             .attr("fill", zone.color);
     });
 
+    // Value bar (narrower, centered vertically)
+    const valueBarH = Math.floor(bulletH * 0.45);
+    const valueBarY = (bulletH - valueBarH) / 2;
     svg.append("rect")
         .attr("x", 0)
-        .attr("y", y + (trackHeight - valueHeight) / 2)
+        .attr("y", valueBarY)
         .attr("width", Math.max(1, valueRatio * width))
-        .attr("height", valueHeight)
-        .attr("rx", 3)
+        .attr("height", valueBarH)
+        .attr("rx", 2)
         .attr("fill", settings.progressColor || theme.accent);
 
+    // Target marker
     svg.append("line")
         .attr("x1", targetRatio * width)
         .attr("x2", targetRatio * width)
-        .attr("y1", y - 4)
-        .attr("y2", y + trackHeight + 4)
+        .attr("y1", -3)
+        .attr("y2", bulletH + 3)
         .attr("stroke", settings.targetLineColor)
         .attr("stroke-width", 2);
+
+    // Scale labels below
+    const labelY = svgH - 2;
+    svg.append("text")
+        .attr("x", 0).attr("y", labelY)
+        .attr("text-anchor", "start")
+        .attr("font-size", 9).attr("fill", theme.textSecondary).attr("font-weight", 600)
+        .text("0");
+
+    const midVal = domainMax * 0.5;
+    svg.append("text")
+        .attr("x", width * 0.5).attr("y", labelY)
+        .attr("text-anchor", "middle")
+        .attr("font-size", 9).attr("fill", theme.textSecondary).attr("font-weight", 600)
+        .text(formatValue(midVal, settings));
+
+    svg.append("text")
+        .attr("x", targetRatio * width).attr("y", labelY)
+        .attr("text-anchor", targetRatio > 0.85 ? "end" : "middle")
+        .attr("font-size", 9).attr("fill", theme.textSecondary).attr("font-weight", 600)
+        .text(`Meta ${data.comparisonText ?? formatValue(target, settings)}`);
 }
+
