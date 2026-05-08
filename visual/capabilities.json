@@ -19,6 +19,11 @@
       "name": "trendValues",
       "displayName": "Trend Values",
       "kind": "Measure"
+    },
+    {
+      "name": "trendComparison",
+      "displayName": "Trend Comparison",
+      "kind": "Measure"
     }
   ],
   "objects": {
@@ -31,7 +36,16 @@
             "enumeration": [
               { "value": "default" },
               { "value": "progress" },
-              { "value": "microchart" }
+              { "value": "microchart" },
+              { "value": "area" },
+              { "value": "bars" },
+              { "value": "barsLine" },
+              { "value": "bullet" },
+              { "value": "donut" },
+              { "value": "lollipop" },
+              { "value": "dual" },
+              { "value": "callout" },
+              { "value": "stackedCompare" }
             ]
           }
         },
@@ -51,53 +65,23 @@
       "properties": {
         "valueColor": {
           "displayName": "Value",
-          "type": {
-            "fill": {
-              "solid": {
-                "color": true
-              }
-            }
-          }
+          "type": { "fill": { "solid": { "color": true } } }
         },
         "positiveColor": {
           "displayName": "Positive",
-          "type": {
-            "fill": {
-              "solid": {
-                "color": true
-              }
-            }
-          }
+          "type": { "fill": { "solid": { "color": true } } }
         },
         "negativeColor": {
           "displayName": "Negative",
-          "type": {
-            "fill": {
-              "solid": {
-                "color": true
-              }
-            }
-          }
+          "type": { "fill": { "solid": { "color": true } } }
         },
         "progressColor": {
           "displayName": "Progress",
-          "type": {
-            "fill": {
-              "solid": {
-                "color": true
-              }
-            }
-          }
+          "type": { "fill": { "solid": { "color": true } } }
         },
         "successColor": {
           "displayName": "Success",
-          "type": {
-            "fill": {
-              "solid": {
-                "color": true
-              }
-            }
-          }
+          "type": { "fill": { "solid": { "color": true } } }
         }
       }
     },
@@ -106,19 +90,11 @@
       "properties": {
         "valueFontSize": {
           "displayName": "Value font size",
-          "type": {
-            "formatting": {
-              "fontSize": true
-            }
-          }
+          "type": { "formatting": { "fontSize": true } }
         },
         "labelFontSize": {
           "displayName": "Label font size",
-          "type": {
-            "formatting": {
-              "fontSize": true
-            }
-          }
+          "type": { "formatting": { "fontSize": true } }
         },
         "displayUnits": {
           "displayName": "Display units",
@@ -133,10 +109,39 @@
         },
         "decimalPlaces": {
           "displayName": "Decimal places",
-          "type": {
-            "numeric": true
-          }
+          "type": { "numeric": true }
         }
+      }
+    },
+    "miniChart": {
+      "displayName": "Mini Chart",
+      "properties": {
+        "showLastValueLabel": { "displayName": "Show last value label", "type": { "bool": true } },
+        "highlightLastPoint": { "displayName": "Highlight last point", "type": { "bool": true } },
+        "highlightColor": { "displayName": "Highlight color", "type": { "fill": { "solid": { "color": true } } } },
+        "chartHeight": { "displayName": "Chart height", "type": { "numeric": true } },
+        "barColor": { "displayName": "Bar color", "type": { "fill": { "solid": { "color": true } } } },
+        "lineColor": { "displayName": "Line color", "type": { "fill": { "solid": { "color": true } } } },
+        "areaFillOpacity": { "displayName": "Area fill opacity", "type": { "numeric": true } }
+      }
+    },
+    "titleSubtitle": {
+      "displayName": "Title & Subtitle",
+      "properties": {
+        "showTitle": { "displayName": "Show title", "type": { "bool": true } },
+        "titleText": { "displayName": "Title text", "type": { "text": true } },
+        "titleFontSize": { "displayName": "Title font size", "type": { "numeric": true } },
+        "deltaSuffix": { "displayName": "Delta suffix", "type": { "text": true } }
+      }
+    },
+    "bulletDonut": {
+      "displayName": "Bullet/Donut",
+      "properties": {
+        "targetLineColor": { "displayName": "Target line color", "type": { "fill": { "solid": { "color": true } } } },
+        "bulletGoodColor": { "displayName": "Bullet good color", "type": { "fill": { "solid": { "color": true } } } },
+        "bulletMidColor": { "displayName": "Bullet mid color", "type": { "fill": { "solid": { "color": true } } } },
+        "bulletBadColor": { "displayName": "Bullet bad color", "type": { "fill": { "solid": { "color": true } } } },
+        "donutThickness": { "displayName": "Donut thickness", "type": { "numeric": true } }
       }
     }
   },
@@ -147,35 +152,21 @@
           "value": { "max": 1 },
           "comparison": { "max": 1 },
           "trend": { "max": 1 },
-          "trendValues": { "max": 1 }
+          "trendValues": { "max": 1 },
+          "trendComparison": { "max": 1 }
         }
       ],
       "categorical": {
         "categories": {
-          "for": {
-            "in": "trend"
-          },
-          "dataReductionAlgorithm": {
-            "top": {}
-          }
+          "for": { "in": "trend" },
+          "dataReductionAlgorithm": { "top": {} }
         },
         "values": {
           "select": [
-            {
-              "bind": {
-                "to": "value"
-              }
-            },
-            {
-              "bind": {
-                "to": "comparison"
-              }
-            },
-            {
-              "bind": {
-                "to": "trendValues"
-              }
-            }
+            { "bind": { "to": "value" } },
+            { "bind": { "to": "comparison" } },
+            { "bind": { "to": "trendValues" } },
+            { "bind": { "to": "trendComparison" } }
           ]
         }
       }

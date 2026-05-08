@@ -1,10 +1,19 @@
 # KPI Design Studio para Power BI
 
-Proyecto de visual personalizado (`pbiviz`) con 3 diseños iniciales de KPI Cards:
+Proyecto de visual personalizado (`pbiviz`) con 12 variantes de KPI Cards:
 
-- `default`: valor principal + delta vs comparación.
-- `progress`: valor + barra de progreso vs objetivo.
-- `microchart`: valor + sparkline (línea) con serie temporal.
+1. `default` — valor principal + delta vs comparación.
+2. `progress` — valor + barra de progreso vs objetivo.
+3. `microchart` — valor + sparkline + meses + etiqueta de último valor.
+4. `area` — valor + delta + área sombreada de tendencia.
+5. `bars` — valor + mini barras mensuales con último resaltado.
+6. `barsLine` — barras de fondo + línea combinada.
+7. `bullet` — bullet chart horizontal (actual vs target).
+8. `donut` — anillo de cumplimiento con porcentaje central.
+9. `lollipop` — mini lollipop chart mensual.
+10. `dual` — dos sub-KPIs lado a lado.
+11. `callout` — card con borde lateral y delta tipo badge.
+12. `stackedCompare` — barras apiladas comparando dos series.
 
 ## Estructura del repositorio
 
@@ -51,6 +60,7 @@ El comando genera el archivo `.pbiviz` en `visual/dist/`.
    - `comparison`: Total Previous o Total Target
    - `trend`: Date
    - `trendValues`: Actual
+   - `trendComparison` (opcional): serie comparativa para `stackedCompare`.
 
 ## Modo desarrollo
 
@@ -61,15 +71,9 @@ pbiviz start
 
 Luego habilita **Developer visual** en Power BI Service/Desktop según tu flujo de desarrollo.
 
-## Roadmap
+## Mini guía visual rápida
 
-- [x] default
-- [x] progress
-- [x] microchart
-- [ ] accent (TODO)
-- [ ] trail (TODO)
-- [ ] scorecard (TODO)
-- [ ] gauge (TODO)
-- [ ] breakdown (TODO)
-- [ ] range (TODO)
-- [ ] multi (TODO)
+- 🟥 **Cards ejecutivas**: `default`, `callout`, `dual`
+- 📈 **Tendencia**: `microchart`, `area`, `barsLine`, `lollipop`
+- 📊 **Comparativo**: `bars`, `stackedCompare`, `bullet`
+- 🍩 **Cumplimiento**: `progress`, `donut`

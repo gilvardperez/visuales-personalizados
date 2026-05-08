@@ -13,9 +13,18 @@ import DataViewValueColumn = powerbi.DataViewValueColumn;
 
 import { getVisualSettings, VisualFormattingSettingsModel } from "./settings";
 import { KpiRenderData, TrendPoint } from "./kpis/types";
-import { render as renderDefaultKpi } from "./kpis/defaultKpi";
-import { render as renderProgressKpi } from "./kpis/progressKpi";
-import { render as renderMicrochartKpi } from "./kpis/microchartKpi";
+import { renderDefaultKpi } from "./kpis/defaultKpi";
+import { renderProgressKpi } from "./kpis/progressKpi";
+import { renderMicrochartKpi } from "./kpis/microchartKpi";
+import { renderAreaKpi } from "./kpis/areaKpi";
+import { renderBarsKpi } from "./kpis/barsKpi";
+import { renderBarsLineKpi } from "./kpis/barsLineKpi";
+import { renderBulletKpi } from "./kpis/bulletKpi";
+import { renderDonutKpi } from "./kpis/donutKpi";
+import { renderLollipopKpi } from "./kpis/lollipopKpi";
+import { renderDualKpi } from "./kpis/dualKpi";
+import { renderCalloutKpi } from "./kpis/calloutKpi";
+import { renderStackedCompareKpi } from "./kpis/stackedCompareKpi";
 
 export class Visual implements IVisual {
     private hostElement: HTMLElement;
@@ -58,6 +67,33 @@ export class Visual implements IVisual {
             case "microchart":
                 renderMicrochartKpi(this.hostElement, renderData, settings);
                 break;
+            case "area":
+                renderAreaKpi(this.hostElement, renderData, settings);
+                break;
+            case "bars":
+                renderBarsKpi(this.hostElement, renderData, settings);
+                break;
+            case "barsLine":
+                renderBarsLineKpi(this.hostElement, renderData, settings);
+                break;
+            case "bullet":
+                renderBulletKpi(this.hostElement, renderData, settings);
+                break;
+            case "donut":
+                renderDonutKpi(this.hostElement, renderData, settings);
+                break;
+            case "lollipop":
+                renderLollipopKpi(this.hostElement, renderData, settings);
+                break;
+            case "dual":
+                renderDualKpi(this.hostElement, renderData, settings);
+                break;
+            case "callout":
+                renderCalloutKpi(this.hostElement, renderData, settings);
+                break;
+            case "stackedCompare":
+                renderStackedCompareKpi(this.hostElement, renderData, settings);
+                break;
             default:
                 renderDefaultKpi(this.hostElement, renderData, settings);
                 break;
@@ -79,6 +115,7 @@ export class Visual implements IVisual {
         const valueColumn = this.getValueColumn(dataView, "value");
         const comparisonColumn = this.getValueColumn(dataView, "comparison");
         const trendValueColumn = this.getValueColumn(dataView, "trendValues");
+        const trendComparisonColumn = this.getValueColumn(dataView, "trendComparison");
         const trendCategory = this.getTrendCategory(dataView);
 
         const value = this.getPrimaryNumber(valueColumn);
@@ -95,16 +132,33 @@ export class Visual implements IVisual {
             format: valueColumn?.source?.format
         });
 
+        const comparisonFormatter = valueFormatter.create({
+            value: scaleValue,
+            precision: decimalPlaces,
+            format: comparisonColumn?.source?.format ?? valueColumn?.source?.format
+        });
+
         const deltaRatio = comparison !== null && comparison !== 0 ? (value - comparison) / Math.abs(comparison) : null;
         const trendPoints = this.buildTrendPoints(trendCategory, trendValueColumn);
+        const trendComparisonPoints = this.buildTrendPoints(trendCategory, trendComparisonColumn);
+
+        const formattedDelta = deltaRatio !== null
+            ? `${deltaRatio >= 0 ? "+" : ""}${(deltaRatio * 100).toFixed(decimalPlaces)}%`
+            : undefined;
 
         return {
             label: valueColumn?.source?.displayName || "Value",
+            value,
+            comparison,
             valueText: formatter.format(value),
-            deltaText: deltaRatio !== null ? `${(deltaRatio * 100).toFixed(decimalPlaces)}%` : undefined,
+            comparisonText: comparison !== null ? comparisonFormatter.format(comparison) : undefined,
+            deltaText: formattedDelta,
+            deltaRaw: deltaRatio ?? undefined,
             isDeltaPositive: deltaRatio !== null ? deltaRatio >= 0 : undefined,
             progressRatio: comparison !== null && comparison !== 0 ? value / comparison : 0,
-            trendPoints
+            trendPoints,
+            trendComparisonPoints,
+            hasTrendComparison: !!trendComparisonColumn
         };
     }
 
@@ -158,7 +212,8 @@ export class Visual implements IVisual {
             if (y !== null && y !== undefined && Number.isFinite(y)) {
                 points.push({
                     x: String(categoryColumn.values[i]),
-                    y
+                    y,
+                    index: i
                 });
             }
         }
