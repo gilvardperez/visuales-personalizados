@@ -1,0 +1,93 @@
+name: Build and Release PBIVIZ
+
+on:
+  push:
+    paths:
+      - "visual/**"
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install pbiviz tools
+        run: npm install -g powerbi-visuals-tools@latest
+
+      - name: Install dependencies
+        run: |
+          cd visual
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Install dev certificate
+        run: pbiviz --install-cert || true
+
+      - name: Build pbiviz package
+        id: build_pbiviz
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/pbiviz-debug
+
+          cd visual
+          if pbiviz package 2>&1 | tee /tmp/pbiviz-debug/pbiviz-package.log; then
+            echo "package_success=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "package_success=false" >> "$GITHUB_OUTPUT"
+            echo "pbiviz package failed. Full log:"
+            cat /tmp/pbiviz-debug/pbiviz-package.log
+          fi
+
+          find . -type f \( -name "*.log" -o -name "*.tmp" \) -exec cp --parents {} /tmp/pbiviz-debug/ \; || true
+
+      - name: Upload pbiviz artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pbiviz-package
+          path: visual/dist/*.pbiviz
+          if-no-files-found: warn
+
+      - name: Upload debug logs artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pbiviz-debug
+          path: /tmp/pbiviz-debug/**
+          if-no-files-found: ignore
+
+      - name: Publish versioned release from tag
+        if: startsWith(github.ref, 'refs/tags/v') && steps.build_pbiviz.outputs.package_success == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: visual/dist/*.pbiviz
+
+      - name: Publish rolling latest release
+        if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.build_pbiviz.outputs.package_success == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: latest
+          prerelease: true
+          target_commitish: ${{ github.sha }}
+          files: visual/dist/*.pbiviz
+
+      - name: Fail job when package fails
+        if: steps.build_pbiviz.outputs.package_success != 'true'
+        run: exit 1
